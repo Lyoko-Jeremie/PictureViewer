@@ -1,0 +1,24 @@
+#include "MainMenu.h"
+
+MainMenu MENU
+{
+    POPUP "文件（&File）"
+    {
+        MENUITEM "打开（&Open）", MENU_FILE_ID_OPEN
+        MENUITEM "关闭（&Close）", MENU_FILE_ID_CLOSE
+        MENUITEM "退出（&Exit）", MENU_FILE_ID_EXIT
+    }
+    POPUP "浏览（&Explorer）"
+    {
+        MENUITEM "上一个（&Last）", MENU_EXPLORER_ID_LAST
+        MENUITEM "下一个（&Next）", MENU_EXPLORER_ID_NEXT
+    }
+    POPUP "帮助（&Help）"
+    {
+        MENUITEM "关于（&About）", MENU_HELP_ID_ABOUT
+    }
+}
+
+
+
+

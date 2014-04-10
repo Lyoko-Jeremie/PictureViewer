@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "MainMenu.h"
 
 /*  消息回调函数  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -31,7 +32,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);       // 图标
     wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);     // 图标 小
     wincl.hCursor = LoadCursor (NULL, IDC_ARROW);         // 鼠标指针
-    wincl.lpszMenuName = NULL;                 // C风格ASCII菜单资源名字符串
+    wincl.lpszMenuName = "MainMenu";                 // C风格ASCII菜单资源名字符串
     // 下面两个是附加的运行时间消息，置0即可
     wincl.cbClsExtra = 0;
     wincl.cbWndExtra = 0;
@@ -58,7 +59,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
            CW_USEDEFAULT,
            // 父窗口指针 作为桌面的子窗口
            HWND_DESKTOP,
-           NULL,                /* 菜单句柄 */
+           LoadMenu( hThisInstance, "MainMenu") ,                /* 菜单句柄 */
            hThisInstance,       /* hInstance */
            NULL                 /* 高级特征 */
            );
@@ -120,9 +121,58 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             // 窗口创建
             break;
 
+        case WM_COMMAND:
+            // 菜单消息
+            {
+                // 解析具体的菜单消息
+                switch ( LOWORD( wParam ) )
+                {
+                case MENU_FILE_ID_OPEN:
+                    break;
+
+                case MENU_FILE_ID_CLOSE:
+                    break;
+
+                case MENU_FILE_ID_EXIT:
+                    PostMessage( hwnd, WM_DESTROY, 0, 0);
+                    break;
+
+                case MENU_EXPLORER_ID_LAST:
+                    break;
+
+                case MENU_EXPLORER_ID_NEXT:
+                    break;
+
+                case MENU_HELP_ID_ABOUT:
+                    MessageBox(
+                               hwnd,
+                               "Picture Viewer\n\n\nDesign by Jeremie\n\n\nPower by DirectX",
+                               "About Picture Viewer",
+                               MB_OK | MB_ICONEXCLAMATION
+                               );
+                    break;
+
+                default:
+                    // Nothing.....
+                    break;
+                }
+            }
+          break;
+
         default:                      // 调用默认消息函数
             return DefWindowProc (hwnd, message, wParam, lParam);
     }
 
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+

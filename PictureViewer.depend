@@ -1,4 +1,9 @@
 # depslib dependency file v1.0
-1397138967 source:h:\github\pictureviewer\main.cpp
+1397142091 source:h:\github\pictureviewer\main.cpp
 	<windows.h>
+
+1397142209 source:h:\github\pictureviewer\mainmenu.rc
+	"MainMenu.h"
+
+1397142235 h:\github\pictureviewer\mainmenu.h
 
