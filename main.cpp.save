@@ -90,36 +90,23 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 {
     switch (message)                  // 处理消息
     {
-        case WM_DESTROY:
-            // 销毁 窗口关闭按钮按下
-            // 在这里清除一切
-            PostQuitMessage (0);    // 发送 WM_QUIT 消息退出整个程序
+        case WM_DESTROY:              // 退出消息
+            PostQuitMessage (0);
             break;
-
+        case WM_CLOSE:
+            // 窗口关闭
+            PostQuitMessage (0);
+            break;
+        case WM_MOVE:
+            // 窗口被移动
+            break;
         case WM_PAINT:
-            // 重绘
-            {
-                PAINTSTRUCT ps;
-                // 激活窗口 并用背景画刷重绘整个窗口
-                // hdc 为图形环境句柄
-                HDC hdc = BeginPaint( hwnd, &ps);
-                // 重绘代码
-                EndPaint( hwnd, &ps);
-            }
+            // 重绘消息
             break;
-
         case WM_KEYDOWN:
-            // 按键按下
+            // 按键按下消息
             break;
-
-        case WM_SIZE:
-            // 大小改变
-            break;
-
-        case WM_CREATE:
-            // 窗口创建
-            break;
-
+        case WM_S
         default:                      // 调用默认消息函数
             return DefWindowProc (hwnd, message, wParam, lParam);
     }
