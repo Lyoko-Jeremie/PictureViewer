@@ -13,7 +13,11 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="D:/DXSDK/include" />
 				</Compiler>
+				<Linker>
+					<Add library="D:\DXSDK\lib\ddraw.lib" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/PictureViewer" prefix_auto="1" extension_auto="1" />
@@ -37,6 +41,12 @@
 			<Add library="kernel32" />
 			<Add library="comctl32" />
 		</Linker>
+		<Unit filename="DirectXControl.cpp" />
+		<Unit filename="DirectXControl.h" />
+		<Unit filename="MainMenu.RC">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="MainMenu.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<DoxyBlocks>

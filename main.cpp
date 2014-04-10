@@ -1,11 +1,22 @@
+// WIN SDK
 #include <windows.h>
+// 菜单资源
 #include "MainMenu.h"
+// DirectXControl包装类
+#include "DirectXControl.h"
 
 /*  消息回调函数  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
 
 /*  将类名保存在全局变量中  */
 char szClassName[ ] = "PictureViewer";
+
+// 按键检测宏
+#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
+#define KEYUP(vk_code)   ((GetAsyncKeyState(vk_code) & 0x8000) ? 0 : 1)
+
+// 控制结构指针
+DirectXControl *gdxc = nullptr;
 
 // WinMain主函数
 int WINAPI WinMain (HINSTANCE hThisInstance,
@@ -67,6 +78,14 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     // 显示窗口
     ShowWindow (hwnd, nCmdShow);
 
+    // 创建控制对象
+    DirectXControl dxc(hwnd);
+    // 检测是否创建成功
+    if ( !dxc.AreInitiSccess() )
+        return -1;
+    // 指针指向
+    gdxc = &dxc;
+
     // 消息循环，直到GetMessage()返回0
     while (GetMessage (&messages, NULL, 0, 0))
     {
@@ -75,6 +94,10 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
         // 发送消息到消息回调函数
         DispatchMessage(&messages);
     }
+
+    // 释放
+    gdxc = nullptr;
+    // 程序结束会自动析构dxc局部对象
 
     // 程序返回值，返回PostQuitMessage()函数的参数
     return messages.wParam;
