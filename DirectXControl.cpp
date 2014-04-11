@@ -34,3 +34,22 @@ bool DirectXControl::AreInitiSccess()
     return this->AllReady;
 }
 
+
+bool DirectXControl::SetDisplayMode(DWORD dwWidth, DWORD dwHeight, DWORD dwBPP, DWORD dwRefreshRate = 0, DWORD dwFlag = 0)
+{
+    if ( FAILED( this->lpdd7->SetDisplayMode( dwWidth, dwHeight, dwBPP, dwRefreshRate, dwFlag ) ) )
+    {
+        return false;
+    }
+//    this->dwWidth = dwWidth;
+//    this->dwHeight = dwHeight;
+//    this->dwBPP = dwBPP;
+//    this->dwRefreshRate = dwRefreshRate;
+    return true;
+}
+
+
+
+
+
+

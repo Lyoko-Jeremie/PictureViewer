@@ -11,12 +11,30 @@ LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
 /*  将类名保存在全局变量中  */
 char szClassName[ ] = "PictureViewer";
 
-// 按键检测宏
-#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
-#define KEYUP(vk_code)   ((GetAsyncKeyState(vk_code) & 0x8000) ? 0 : 1)
-
 // 控制结构指针
 DirectXControl *gdxc = nullptr;
+
+// 窗口设置
+const DWORD gwWidth = 800;
+const DWORD gwHeight =  600;
+
+// 菜单句柄
+HMENU ghMenuHandle = nullptr;
+// 菜单显影
+bool gbMenuIsShow = false;
+
+// 按键检测宏
+//#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
+//#define KEYUP(vk_code)   ((GetAsyncKeyState(vk_code) & 0x8000) ? 0 : 1)
+// 按键检测函数
+inline bool KEYUP(int vk_code)
+{
+    return (GetAsyncKeyState(vk_code) & 0x8000) ? false : true;
+}
+inline bool KEYDOWN(int vk_code)
+{
+    return (GetAsyncKeyState(vk_code) & 0x8000) ? true : false;
+}
 
 // WinMain主函数
 int WINAPI WinMain (HINSTANCE hThisInstance,
@@ -65,18 +83,23 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
            // 窗口XY坐标 CW_USEDEFAULT为自动
            CW_USEDEFAULT,
            CW_USEDEFAULT,
-           // 窗口宽高 CW_USEDEFAULT为自动
-           CW_USEDEFAULT,
-           CW_USEDEFAULT,
+           // 窗口宽高
+           gwWidth,
+           gwHeight,
            // 父窗口指针 作为桌面的子窗口
            HWND_DESKTOP,
-           LoadMenu( hThisInstance, "MainMenu") ,                /* 菜单句柄 */
+           NULL,                /* 菜单句柄 */
            hThisInstance,       /* hInstance */
            NULL                 /* 高级特征 */
            );
 
     // 显示窗口
     ShowWindow (hwnd, nCmdShow);
+
+    ghMenuHandle = LoadMenu( hThisInstance, "MainMenu");
+    // hwnd 窗口句柄    ghMenuHandle 菜单句柄
+    SetMenu( hwnd, ghMenuHandle);
+    gbMenuIsShow = true;
 
     // 创建控制对象
     DirectXControl dxc(hwnd);
@@ -86,13 +109,27 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     // 指针指向
     gdxc = &dxc;
 
-    // 消息循环，直到GetMessage()返回0
-    while (GetMessage (&messages, NULL, 0, 0))
+//    // 消息循环，直到GetMessage()返回0
+//    while (GetMessage (&messages, NULL, 0, 0))
+//    {
+//        // 将虚拟按键消息转换为字符消息
+//        TranslateMessage(&messages);
+//        // 发送消息到消息回调函数
+//        DispatchMessage(&messages);
+//    }
+
+    // peek模式消息循环
+    while ( true )
     {
-        // 将虚拟按键消息转换为字符消息
-        TranslateMessage(&messages);
-        // 发送消息到消息回调函数
-        DispatchMessage(&messages);
+        if ( PeekMessage( &messages, 0, 0, 0, PM_REMOVE))
+        {
+            if (WM_QUIT==messages.message)
+                break;
+            TranslateMessage(&messages);
+            DispatchMessage(&messages);
+        }
+        /**< CPU防满载延迟 */
+        Sleep(30);
     }
 
     // 释放
@@ -132,7 +169,38 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             }
             break;
 
+        // 鼠标消息
+        // 鼠标消息坐标相对于所在窗口用户区
+        case WM_MOUSEMOVE:
+            // 鼠标移动中消息
+            // x= static_cast<int> LOWORD(lParam)
+            // y= static_cast<int> HIWORD(lParam)
+            // 按键= static_cast<int> LOWORD(wParam)
+            if ( (static_cast<int> HIWORD(lParam) < 20) && ( !gbMenuIsShow ) ) // 暂时不检测窗口
+            {
+                gbMenuIsShow = SetMenu( hwnd, ghMenuHandle);
+            }
+            if ( (static_cast<int> HIWORD(lParam) > 20) && ( gbMenuIsShow ) )
+            {
+                gbMenuIsShow = !SetMenu( hwnd, nullptr);
+            }
+            break;
+
         case WM_KEYDOWN:
+            if ( KEYDOWN( VK_ESCAPE ) )
+            {
+                // 发送退出消息
+                PostMessage( hwnd, WM_DESTROY, 0, 0);
+                return 0;
+            }
+            if ( KEYDOWN( VK_LEFT ) )
+            {
+                // 左箭头
+            }
+            if ( KEYDOWN( VK_RIGHT ) )
+            {
+                // 右箭头
+            }
             // 按键按下
             break;
 
@@ -157,6 +225,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     break;
 
                 case MENU_FILE_ID_EXIT:
+                    // 发送退出消息
                     PostMessage( hwnd, WM_DESTROY, 0, 0);
                     break;
 
@@ -177,6 +246,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
                 default:
                     // Nothing.....
+                    return DefWindowProc (hwnd, message, wParam, lParam);
                     break;
                 }
             }
