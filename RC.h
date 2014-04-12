@@ -2,6 +2,7 @@
 #define MAINMENU_H_INCLUDED
 
 
+// ²Ëµ¥×ÊÔ´
 #define MENU_FILE_ID_OPEN 10001
 #define MENU_FILE_ID_CLOSE 10002
 #define MENU_FILE_ID_EXIT 10003
@@ -11,6 +12,7 @@
 
 
 #define MENU_HELP_ID_ABOUT 30001
+
 
 
 

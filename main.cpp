@@ -1,32 +1,51 @@
 // WIN SDK
 #include <windows.h>
-// èœå•èµ„æº
-#include "MainMenu.h"
-// DirectXControlåŒ…è£…ç±»
+#include <windowsx.h>
+// C++String
+#include <string>
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+// ²Ëµ¥×ÊÔ´
+#include "RC.h"
+// DirectXControl°ü×°Àà
 #include "DirectXControl.h"
 
-/*  æ¶ˆæ¯å›è°ƒå‡½æ•°  */
+/*  ÏûÏ¢»Øµ÷º¯Êı  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
 
-/*  å°†ç±»åä¿å­˜åœ¨å…¨å±€å˜é‡ä¸­  */
+void PictrueLast();
+void PictrueNext();
+bool ReDrawing( string filename);
+bool initial();
+bool Shutdown();
+
+/*  ½«ÀàÃû±£´æÔÚÈ«¾Ö±äÁ¿ÖĞ  */
 char szClassName[ ] = "PictureViewer";
 
-// æ§åˆ¶ç»“æ„æŒ‡é’ˆ
-DirectXControl *gdxc = nullptr;
+// ¿ØÖÆ½á¹¹Ö¸Õë
+DirectXControl *glDxc = nullptr;
 
-// çª—å£è®¾ç½®
+// ´°¿ÚÉèÖÃ
 const DWORD gwWidth = 800;
 const DWORD gwHeight =  600;
 
-// èœå•å¥æŸ„
+// ²Ëµ¥¾ä±ú
 HMENU ghMenuHandle = nullptr;
-// èœå•æ˜¾å½±
+// ²Ëµ¥ÏÔÓ°
 bool gbMenuIsShow = false;
+// ´°¿Ú¾ä±ú
+HWND gHwnd = nullptr;
+// ³ÌĞò¾ä±ú
+HINSTANCE gHInstance = nullptr;
 
-// æŒ‰é”®æ£€æµ‹å®
+// ÀàĞÍ
+typedef unsigned long DWORD;
+
+// °´¼ü¼ì²âºê
 //#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
 //#define KEYUP(vk_code)   ((GetAsyncKeyState(vk_code) & 0x8000) ? 0 : 1)
-// æŒ‰é”®æ£€æµ‹å‡½æ•°
+// °´¼ü¼ì²âº¯Êı
 inline bool KEYUP(int vk_code)
 {
     return (GetAsyncKeyState(vk_code) & 0x8000) ? false : true;
@@ -36,89 +55,110 @@ inline bool KEYDOWN(int vk_code)
     return (GetAsyncKeyState(vk_code) & 0x8000) ? true : false;
 }
 
-// WinMainä¸»å‡½æ•°
+// WinMainÖ÷º¯Êı
 int WINAPI WinMain (HINSTANCE hThisInstance,
                      HINSTANCE hPrevInstance,
                      LPSTR lpszArgument,
                      int nCmdShow)
 {
-    HWND hwnd;               /* çª—å£å¥æŸ„ */
-    MSG messages;            /* æ¶ˆæ¯ç»“æ„ä½“ */
-    WNDCLASSEX wincl;        /* çª—å£å†…ç»“æ„ä½“ */
+    gHInstance = hThisInstance;     // ±¾³ÌĞò¾ä±ú
+    HWND hwnd;               /* ´°¿Ú¾ä±ú */
+    MSG messages;            /* ÏûÏ¢½á¹¹Ìå */
+    WNDCLASSEX wincl;        /* ´°¿ÚÄÚ½á¹¹Ìå */
 
-    /* æ„é€ çª—å£å†…ç»“æ„ä½“ */
-    wincl.hInstance = hThisInstance;          // hInstance å­—æ®µ
-    wincl.lpszClassName = szClassName;        // çª—å£ç±»å
-    wincl.lpfnWndProc = WindowProcedure;      /* å›è°ƒå‡½æ•°æŒ‡é’ˆ */
-    // çª—å£å±æ€§æ ·å¼
-    // CS_DBLCLKS æ¥å—åŒå‡»æ¶ˆæ¯
-    // CS_HREDRAW CS_VREDRAW åœ¨æ”¹å˜å®½é«˜æ—¶åˆ·æ–°
-    // CS_OWNDC è·å–è®¾å¤‡æè¿°è¡¨
+    /* ¹¹Ôì´°¿ÚÄÚ½á¹¹Ìå */
+    wincl.hInstance = hThisInstance;          // hInstance ×Ö¶Î
+    wincl.lpszClassName = szClassName;        // ´°¿ÚÀàÃû
+    wincl.lpfnWndProc = WindowProcedure;      /* »Øµ÷º¯ÊıÖ¸Õë */
+    // ´°¿ÚÊôĞÔÑùÊ½
+    // CS_DBLCLKS ½ÓÊÜË«»÷ÏûÏ¢
+    // CS_HREDRAW CS_VREDRAW ÔÚ¸Ä±ä¿í¸ßÊ±Ë¢ĞÂ
+    // CS_OWNDC »ñÈ¡Éè±¸ÃèÊö±í
     wincl.style = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC ;
-    wincl.cbSize = sizeof (WNDCLASSEX);       // çª—å£ç±»ç»“æ„ä½“å¤§å°
+    wincl.cbSize = sizeof (WNDCLASSEX);       // ´°¿ÚÀà½á¹¹Ìå´óĞ¡
 
-    /* ä½¿ç”¨é»˜è®¤çš„iconå’Œé¼ æ ‡æŒ‡é’ˆ */
-    wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);       // å›¾æ ‡
-    wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);     // å›¾æ ‡ å°
-    wincl.hCursor = LoadCursor (NULL, IDC_ARROW);         // é¼ æ ‡æŒ‡é’ˆ
-    wincl.lpszMenuName = "MainMenu";                 // Cé£æ ¼ASCIIèœå•èµ„æºåå­—ç¬¦ä¸²
-    // ä¸‹é¢ä¸¤ä¸ªæ˜¯é™„åŠ çš„è¿è¡Œæ—¶é—´æ¶ˆæ¯ï¼Œç½®0å³å¯
+    /* Ê¹ÓÃÄ¬ÈÏµÄiconºÍÊó±êÖ¸Õë */
+    wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);       // Í¼±ê
+    wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);     // Í¼±ê Ğ¡
+    wincl.hCursor = LoadCursor (NULL, IDC_ARROW);         // Êó±êÖ¸Õë
+    wincl.lpszMenuName = NULL;   //"MainMenu";                 // C·ç¸ñASCII²Ëµ¥×ÊÔ´Ãû×Ö·û´®
+    // ÏÂÃæÁ½¸öÊÇ¸½¼ÓµÄÔËĞĞÊ±¼äÏûÏ¢£¬ÖÃ0¼´¿É
     wincl.cbClsExtra = 0;
     wincl.cbWndExtra = 0;
-    // èƒŒæ™¯é¢œè‰² ä½¿ç”¨é»˜è®¤èƒŒæ™¯è‰²ç”»åˆ·
+    // ±³¾°ÑÕÉ« Ê¹ÓÃÄ¬ÈÏ±³¾°É«»­Ë¢
     wincl.hbrBackground = (HBRUSH) COLOR_BACKGROUND;
 
-    // æ³¨å†Œçª—å£ç±»ï¼Œå¤±è´¥åˆ™é€€å‡ºç¨‹åº
+    // ×¢²á´°¿ÚÀà£¬Ê§°ÜÔòÍË³ö³ÌĞò
     if (!RegisterClassEx (&wincl))
         return -1;
 
-    // çª—å£ç±»æ³¨å†Œå®Œæ¯•ï¼Œåˆ›å»º Windowsç±»
-    hwnd = CreateWindowEx (
-           0,                   // çª—å£æ ·å¼ æ‰©å±•æ ·å¼æ ‡å¿—
-           szClassName,         /* ç±»å */
-           "Picture Viewer",    /* çª—å£æ ‡é¢˜ Cé£æ ¼å­—ç¬¦ä¸² */
-           // çª—å£å¤–è§‚å’Œè¡Œä¸ºçš„é€šç”¨æ ‡å¿—
-           // WS_OVERLAPPEDWINDOW å¸¸ç”¨çš„æ ‡å‡†é£æ ¼
-           WS_OVERLAPPEDWINDOW,
-           // çª—å£XYåæ ‡ CW_USEDEFAULTä¸ºè‡ªåŠ¨
-           CW_USEDEFAULT,
-           CW_USEDEFAULT,
-           // çª—å£å®½é«˜
-           gwWidth,
-           gwHeight,
-           // çˆ¶çª—å£æŒ‡é’ˆ ä½œä¸ºæ¡Œé¢çš„å­çª—å£
-           HWND_DESKTOP,
-           NULL,                /* èœå•å¥æŸ„ */
-           hThisInstance,       /* hInstance */
-           NULL                 /* é«˜çº§ç‰¹å¾ */
-           );
+    // ´°¿ÚÀà×¢²áÍê±Ï£¬´´½¨ WindowsÀà
+    if ( ! (hwnd = CreateWindowEx (
+                0,                   // ´°¿ÚÑùÊ½ À©Õ¹ÑùÊ½±êÖ¾
+                szClassName,         /* ÀàÃû */
+                "Picture Viewer",    /* ´°¿Ú±êÌâ C·ç¸ñ×Ö·û´® */
+                // ´°¿ÚÍâ¹ÛºÍĞĞÎªµÄÍ¨ÓÃ±êÖ¾
+                // WS_OVERLAPPEDWINDOW ³£ÓÃµÄ±ê×¼·ç¸ñ
+                // WS_OVERLAPPED Ö»ÓĞ±êÌâÀ¸²»¿É¸Ä±ä´óĞ¡µÄ´°¿Ú
+                // WS_SYSMENU ÏµÍ³°´Å¥
+                // WS_MINIMIZEBOX ×îĞ¡»¯°´Å¥
+    //            WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
+                // WS_POPUP µ¯³öÊ½´°¿Ú WS_VISIBLE ´´½¨¼´¿É¼û
+                WS_POPUP | WS_VISIBLE ,
+                // ´°¿ÚXY×ø±ê CW_USEDEFAULTÎª×Ô¶¯
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                // ´°¿Ú¿í¸ß     // ÔÚÈ«ÆÁÄ£Ê½ÏÂ¶¼ÒÑ¾­ÎŞËùÎ½ÁË ¾ßÌåÉèÖÃÔÚDirectÏÂ
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                // ¸¸´°¿ÚÖ¸Õë ×÷Îª×ÀÃæµÄ×Ó´°¿Ú
+                HWND_DESKTOP,
+                NULL,                /* ²Ëµ¥¾ä±ú */
+                hThisInstance,       /* hInstance */
+                NULL                 /* ¸ß¼¶ÌØÕ÷ */
+                )
+            )
+        )
+    {
+        return -1;
+    }
 
-    // æ˜¾ç¤ºçª—å£
-    ShowWindow (hwnd, nCmdShow);
+    gHwnd = hwnd;
+
+    // ÏÔÊ¾´°¿Ú
+    //ShowWindow (hwnd, nCmdShow);
 
     ghMenuHandle = LoadMenu( hThisInstance, "MainMenu");
-    // hwnd çª—å£å¥æŸ„    ghMenuHandle èœå•å¥æŸ„
+    // hwnd ´°¿Ú¾ä±ú    ghMenuHandle ²Ëµ¥¾ä±ú
     SetMenu( hwnd, ghMenuHandle);
     gbMenuIsShow = true;
 
-    // åˆ›å»ºæ§åˆ¶å¯¹è±¡
-    DirectXControl dxc(hwnd);
-    // æ£€æµ‹æ˜¯å¦åˆ›å»ºæˆåŠŸ
+    // ´´½¨¿ØÖÆ¶ÔÏó
+    DirectXControl dxc(hwnd,true);
+    // ¼ì²âÊÇ·ñ´´½¨³É¹¦
     if ( !dxc.AreInitiSccess() )
         return -1;
-    // æŒ‡é’ˆæŒ‡å‘
-    gdxc = &dxc;
+    // Ö¸ÕëÖ¸Ïò
+    glDxc = &dxc;
+    initial();
 
-//    // æ¶ˆæ¯å¾ªç¯ï¼Œç›´åˆ°GetMessage()è¿”å›0
+    // È·±£ÔËĞĞÔÚ32Î»É«ÉîÏÂ      // ÎŞËùÎ½ÁË ·´Ö¤È«ÆÁ
+//    if ( glDxc->GetPixelFormat() != 32 )
+//    {
+////        throw runtime_error("Must run in 32-bit color depth environments.");
+//        return 0;
+//    }
+
+//    // ÏûÏ¢Ñ­»·£¬Ö±µ½GetMessage()·µ»Ø0
 //    while (GetMessage (&messages, NULL, 0, 0))
 //    {
-//        // å°†è™šæ‹ŸæŒ‰é”®æ¶ˆæ¯è½¬æ¢ä¸ºå­—ç¬¦æ¶ˆæ¯
+//        // ½«ĞéÄâ°´¼üÏûÏ¢×ª»»Îª×Ö·ûÏûÏ¢
 //        TranslateMessage(&messages);
-//        // å‘é€æ¶ˆæ¯åˆ°æ¶ˆæ¯å›è°ƒå‡½æ•°
+//        // ·¢ËÍÏûÏ¢µ½ÏûÏ¢»Øµ÷º¯Êı
 //        DispatchMessage(&messages);
 //    }
 
-    // peekæ¨¡å¼æ¶ˆæ¯å¾ªç¯
+    // peekÄ£Ê½ÏûÏ¢Ñ­»·
     while ( true )
     {
         if ( PeekMessage( &messages, 0, 0, 0, PM_REMOVE))
@@ -128,55 +168,57 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
             TranslateMessage(&messages);
             DispatchMessage(&messages);
         }
-        /**< CPUé˜²æ»¡è½½å»¶è¿Ÿ */
+        /**< CPU·ÀÂúÔØÑÓ³Ù */
         Sleep(30);
     }
 
-    // é‡Šæ”¾
-    gdxc = nullptr;
-    // ç¨‹åºç»“æŸä¼šè‡ªåŠ¨ææ„dxcå±€éƒ¨å¯¹è±¡
+    Shutdown();
+    // ÊÍ·Å
+    glDxc = nullptr;
+    // ³ÌĞò½áÊø»á×Ô¶¯Îö¹¹dxc¾Ö²¿¶ÔÏó
 
-    // ç¨‹åºè¿”å›å€¼ï¼Œè¿”å›PostQuitMessage()å‡½æ•°çš„å‚æ•°
+
+    // ³ÌĞò·µ»ØÖµ£¬·µ»ØPostQuitMessage()º¯ÊıµÄ²ÎÊı
     return messages.wParam;
 }
 
 
 
 
-// æ¶ˆæ¯å›è°ƒå‡½æ•°
-// hwnd æ¶ˆæ¯æ¥æºçª—å£å¥æŸ„
-// message æ¶ˆæ¯æ ‡è¯†ç¬¦
-// wParam lParam ä¿¡æ¯
+// ÏûÏ¢»Øµ÷º¯Êı
+// hwnd ÏûÏ¢À´Ô´´°¿Ú¾ä±ú
+// message ÏûÏ¢±êÊ¶·û
+// wParam lParam ĞÅÏ¢
 LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    switch (message)                  // å¤„ç†æ¶ˆæ¯
+    switch (message)                  // ´¦ÀíÏûÏ¢
     {
         case WM_DESTROY:
-            // é”€æ¯ çª—å£å…³é—­æŒ‰é’®æŒ‰ä¸‹
-            // åœ¨è¿™é‡Œæ¸…é™¤ä¸€åˆ‡
-            PostQuitMessage (0);    // å‘é€ WM_QUIT æ¶ˆæ¯é€€å‡ºæ•´ä¸ªç¨‹åº
+            // Ïú»Ù ´°¿Ú¹Ø±Õ°´Å¥°´ÏÂ
+            // ÔÚÕâÀïÇå³ıÒ»ÇĞ
+            PostQuitMessage (0);    // ·¢ËÍ WM_QUIT ÏûÏ¢ÍË³öÕû¸ö³ÌĞò
             break;
 
         case WM_PAINT:
-            // é‡ç»˜
+            // ÖØ»æ
             {
-                PAINTSTRUCT ps;
-                // æ¿€æ´»çª—å£ å¹¶ç”¨èƒŒæ™¯ç”»åˆ·é‡ç»˜æ•´ä¸ªçª—å£
-                // hdc ä¸ºå›¾å½¢ç¯å¢ƒå¥æŸ„
-                HDC hdc = BeginPaint( hwnd, &ps);
-                // é‡ç»˜ä»£ç 
-                EndPaint( hwnd, &ps);
+//                PAINTSTRUCT ps;
+                // ¼¤»î´°¿Ú ²¢ÓÃ±³¾°»­Ë¢ÖØ»æÕû¸ö´°¿Ú
+                // hdc ÎªÍ¼ĞÎ»·¾³¾ä±ú
+//                HDC hdc = BeginPaint( hwnd, &ps);
+                // ÖØ»æ´úÂë
+//                EndPaint( hwnd, &ps);
             }
             break;
 
-        // é¼ æ ‡æ¶ˆæ¯
-        // é¼ æ ‡æ¶ˆæ¯åæ ‡ç›¸å¯¹äºæ‰€åœ¨çª—å£ç”¨æˆ·åŒº
+        // Êó±êÏûÏ¢
+        // Êó±êÏûÏ¢×ø±êÏà¶ÔÓÚËùÔÚ´°¿ÚÓÃ»§Çø
         case WM_MOUSEMOVE:
-            // é¼ æ ‡ç§»åŠ¨ä¸­æ¶ˆæ¯
+            // Êó±êÒÆ¶¯ÖĞÏûÏ¢
             // x= static_cast<int> LOWORD(lParam)
             // y= static_cast<int> HIWORD(lParam)
-            // æŒ‰é”®= static_cast<int> LOWORD(wParam)
-            if ( (static_cast<int> HIWORD(lParam) < 20) && ( !gbMenuIsShow ) ) // æš‚æ—¶ä¸æ£€æµ‹çª—å£
+            // °´¼ü= static_cast<int> LOWORD(wParam)
+            if ( (static_cast<int> HIWORD(lParam) < 20) && ( !gbMenuIsShow ) ) // ÔİÊ±²»¼ì²â´°¿Ú
             {
                 gbMenuIsShow = SetMenu( hwnd, ghMenuHandle);
             }
@@ -189,33 +231,40 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case WM_KEYDOWN:
             if ( KEYDOWN( VK_ESCAPE ) )
             {
-                // å‘é€é€€å‡ºæ¶ˆæ¯
+                // ·¢ËÍÍË³öÏûÏ¢
                 PostMessage( hwnd, WM_DESTROY, 0, 0);
                 return 0;
             }
             if ( KEYDOWN( VK_LEFT ) )
             {
-                // å·¦ç®­å¤´
+                // ×ó¼ıÍ·
+                PictrueLast();
             }
             if ( KEYDOWN( VK_RIGHT ) )
             {
-                // å³ç®­å¤´
+                // ÓÒ¼ıÍ·
+                PictrueNext();
             }
-            // æŒ‰é”®æŒ‰ä¸‹
+            // °´¼ü°´ÏÂ
             break;
 
         case WM_SIZE:
-            // å¤§å°æ”¹å˜
+            // ´óĞ¡¸Ä±ä
+            break;
+
+        case WM_MOVE:
+            // ´°¿ÚÒÆ¶¯
+            // TODO ÏìÓ¦move ²¢ÇÒÔÚÓÃ»§Çø»æÍ¼
             break;
 
         case WM_CREATE:
-            // çª—å£åˆ›å»º
+            // ´°¿Ú´´½¨
             break;
 
         case WM_COMMAND:
-            // èœå•æ¶ˆæ¯
+            // ²Ëµ¥ÏûÏ¢
             {
-                // è§£æå…·ä½“çš„èœå•æ¶ˆæ¯
+                // ½âÎö¾ßÌåµÄ²Ëµ¥ÏûÏ¢
                 switch ( LOWORD( wParam ) )
                 {
                 case MENU_FILE_ID_OPEN:
@@ -225,23 +274,25 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     break;
 
                 case MENU_FILE_ID_EXIT:
-                    // å‘é€é€€å‡ºæ¶ˆæ¯
+                    // ·¢ËÍÍË³öÏûÏ¢
                     PostMessage( hwnd, WM_DESTROY, 0, 0);
                     break;
 
                 case MENU_EXPLORER_ID_LAST:
+                    PictrueLast();
                     break;
 
                 case MENU_EXPLORER_ID_NEXT:
+                    PictrueNext();
                     break;
 
                 case MENU_HELP_ID_ABOUT:
-                    MessageBox(
-                               hwnd,
-                               "Picture Viewer\n\n\nDesign by Jeremie\n\n\nPower by DirectX",
-                               "About Picture Viewer",
-                               MB_OK | MB_ICONEXCLAMATION
-                               );
+//                    MessageBox(
+//                               hwnd,
+//                               "Picture Viewer\n\n\nDesign by Jeremie\n\n\nPower by DirectX",
+//                               "About Picture Viewer",
+//                               MB_OK | MB_ICONEXCLAMATION
+//                               );
                     break;
 
                 default:
@@ -252,7 +303,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             }
           break;
 
-        default:                      // è°ƒç”¨é»˜è®¤æ¶ˆæ¯å‡½æ•°
+        default:                      // µ÷ÓÃÄ¬ÈÏÏûÏ¢º¯Êı
             return DefWindowProc (hwnd, message, wParam, lParam);
     }
 
@@ -261,8 +312,85 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
 
 
+// ÉÏÒ»ÕÅÍ¼
+void PictrueLast()
+{
+    // ²âÊÔÏñËØÎ»Êı¡¾½á¹ûÎª32¡¿
+    clog << glDxc->GetPixelFormat() << endl;
+    {
+        RECT a = glDxc->GetMainWindowClientRect();
+        clog << "left " << a.left << endl;
+        clog << "right " << a.right << endl;
+        clog << "top " << a.top << endl;
+        clog << "bottom " << a.bottom << endl;
+    }
+//    {   // Test
+//        RECT MainWindowRect;
+//        RECT MainWindowClientRect;
+//        GetWindowRect( gHwnd, &(MainWindowRect) );
+//        AdjustWindowRect(
+//            &(MainWindowClientRect),
+//            GetWindowStyle(gHwnd),
+//            GetMenu(gHwnd) != nullptr
+//            );
+//        cout << endl;
+//        cout << "left\t" << MainWindowRect.left << endl;
+//        cout << "right\t" << MainWindowRect.right << endl;
+//        cout << "top\t" << MainWindowRect.top << endl;
+//        cout << "bottom\t" << MainWindowRect.bottom << endl;
+//        cout << endl;
+//        cout << "left\t" << MainWindowClientRect.left << endl;          // -3
+//        cout << "right\t" << MainWindowClientRect.right << endl;         // 3
+//        cout << "top\t" << MainWindowClientRect.top << endl;           // -44 -25
+//        cout << "bottom\t" << MainWindowClientRect.bottom << endl;    // 3
+//        cout << endl;
+//        cout << endl;
+//
+////        ÕæÊµ´°¿ÚÓÃ»§Çø¾ØĞÎÎª£º
+////        RL - CRL
+////        RR - CRR
+////        RT - CRT
+////        RB - CRB
+//
+//    }
+    ReDrawing("");
+    return;
+}
+
+//ÏÂÒ»ÕÅÍ¼
+void PictrueNext()
+{
+    ReDrawing("");
+    glDxc->TestPaint();
+    return;
+}
 
 
+// ÖØ»æ
+bool ReDrawing( string filename)
+{
+    return true;
+}
+
+
+// ³õÊ¼»¯
+bool initial()
+{
+    // ÉèÖÃÏÔÊ¾Ä£Ê½
+    glDxc->SetDisplayMode(
+                          static_cast<DWORD> (800),
+                          static_cast<DWORD> (600),
+                          static_cast<DWORD> (16)
+                          );
+    //TODO ¶ÁÎÄ¼ş
+    return true;
+}
+
+// ½áÊø
+bool Shutdown()
+{
+    return true;
+}
 
 
 

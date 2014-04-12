@@ -36,6 +36,7 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Linker>
+			<Add library="D:\DXSDK\lib\ddraw.lib" />
 			<Add library="gdi32" />
 			<Add library="user32" />
 			<Add library="kernel32" />
@@ -43,10 +44,10 @@
 		</Linker>
 		<Unit filename="DirectXControl.cpp" />
 		<Unit filename="DirectXControl.h" />
-		<Unit filename="MainMenu.RC">
+		<Unit filename="RC.RC">
 			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="MainMenu.h" />
+		<Unit filename="RC.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<DoxyBlocks>

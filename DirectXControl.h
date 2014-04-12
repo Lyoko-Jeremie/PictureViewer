@@ -17,20 +17,47 @@
 class DirectXControl
 {
     public:
-        DirectXControl( HWND hwnd );
+        DirectXControl( HWND hwnd, bool IsFullScreen );
         ~DirectXControl();
         // 检测是否初始化成功
         bool AreInitiSccess();
-        // 设置显示模式
-        bool SetDisplayMode( DWORD dwWidth, DWORD dwHeight, DWORD dwBPP, DWORD dwRefreshRate, DWORD dwFlag );
+
+        // 设置显示模式   Note:显示模式的改变影响整个屏幕，所以在窗口模式使用会失效【抛异常】
+        bool SetDisplayMode( DWORD dwWidth, DWORD dwHeight, DWORD dwBPP, DWORD dwRefreshRate = 0, DWORD dwFlag = 0 );
+
+        // 获取像素格式
+        int GetPixelFormat();
+
+        // 用户区坐标
+        RECT GetMainWindowClientRect();
+
+        bool TestPaint();
+
+
     protected:
+
+        inline void DDRAW_INIT_STRUCT( DDPIXELFORMAT &ddstruct);
+        inline void DDRAW_INIT_STRUCT( DDSURFACEDESC2 &ddstruct);
         // 准备完成标志
         bool AllReady;
+        // 全屏标志
+        bool FullScreen;
         // 设备句柄
-        LPDIRECTDRAW lpdd;
+//        LPDIRECTDRAW lpdd;
         LPDIRECTDRAW7 lpdd7;
+        // 绘图表面结构体
+        DDSURFACEDESC2 ddsd;
         // 窗口句柄
         HWND MainWindowHandle;
+        // 窗口坐标
+        RECT MainWindowRect;
+        // 用户区坐标
+        RECT MainWindowClientRect;
+        // 用户区BPP【像素】
+        int MainWindowBPP;
+        // 绘制表面
+        LPDIRECTDRAWSURFACE7 lpddsprimary;
+
 //        // 设置宽高
 //        DWORD dwWidth;
 //        DWORD dwHeight;

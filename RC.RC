@@ -1,4 +1,8 @@
-#include "MainMenu.h"
+#include "RC.h"
+
+STRINGTABLE
+{
+}
 
 MainMenu MENU
 {
