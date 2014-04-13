@@ -50,6 +50,9 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
     MainWindowClientRect( {0,0,0,0} ),
     MainWindowBPP(0)
 {
+    // 初始化结构体
+    DDRAW_INIT_STRUCT(this->ddsd);
+
     this->AllReady = false;
     // 打开接口
     if ( FAILED( DirectDrawCreateEx( NULL, (void**)&lpdd7, IID_IDirectDraw7, NULL ) ) )
@@ -87,28 +90,11 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
             throw runtime_error("DirectXControl():SetCooperativeLevel()fail");
         }
     }
-    // 初始化结构体
-    DDRAW_INIT_STRUCT(this->ddsd);
-    // 设置有效项目
-    this->ddsd.dwFlags = DDSD_CAPS;
-    // 设置为主显示表面
-    this->ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-    // 创建主显示表面
-    if (FAILED( this->lpdd7->CreateSurface(&ddsd, &lpddsprimary, NULL)))
-    {
-        throw runtime_error("DirectXControl():CreateSurface()fail");
-    }
     this->AllReady = true;
 }
 
 DirectXControl::~DirectXControl()
 {
-    // 主显示表面
-    if (lpddsprimary)
-       {
-       lpddsprimary->Release();
-       lpddsprimary = NULL;
-       }
 
     // 接口
     if (lpdd7)
@@ -238,44 +224,106 @@ RECT DirectXControl::GetMainWindowClientRect()
 bool DirectXControl::TestPaint()
 {
 
-    // 获取区域
-    RECT client = this->GetMainWindowClientRect();
+    if ( lpddsprimary )     // 表面指针有效
+    {
+        // 获取区域
+        RECT client = this->GetMainWindowClientRect();
 
-    // 获取句柄
-    this->DDRAW_INIT_STRUCT(ddsd);
+        // 获取句柄
+        this->DDRAW_INIT_STRUCT(ddsd);
 
 
-    clog << "Now Lock" << endl;
+        clog << "Now Lock" << endl;
 
-    // 加锁表面
-    this->lpddsprimary->Lock(NULL,&(this->ddsd),
-                                DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,NULL);
+        // 加锁表面
+        if ( SUCCEEDED(
+                       this->lpddsprimary->Lock(
+                                                NULL,&(this->ddsd),
+                                                DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,
+                                                NULL
+                                                )
+                        )
+            )
+        {
+            // 成功加锁
+            clog << "Lock!" << endl;
 
-    clog << "Lock!" << endl;
 
-    // 获取表面指针
-    UCHAR *primary_buffer = (UCHAR *)ddsd.lpSurface;
+            clog << "ddsd.lPitch " << ddsd.lPitch << endl;
 
-    cout << "ddsd.lPitch " << ddsd.lPitch << endl;
-    cout << "*primary_buffer " << (long)primary_buffer << endl;
+            // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
+            LONG lPitch32 = ddsd.lPitch >> 2;
 
-    // 32位绘图
-//    int x = (client.right - client.left) + client.left;
-//    int y = (client.bottom - client.top) + client.top;
-//    for ( int i = 0; 100!=i; ++i)
-//    {
-//        ++x;
-//        ++y;
-//        DWORD color = _RGB32BIT(0,128, 428, 428);
-//        *((DWORD *)(primary_buffer + x*4 + y*ddsd.lPitch)) = color;
-//    }
+            // 32位保护
+            if ( 32 == this->GetPixelFormat() )
+            {
+                // 获取表面指针
+                DWORD *primary_buffer = (DWORD *)ddsd.lpSurface;
+                // 32位绘图
 
-    clog << "Now Unlock" << endl;
 
-    // 解锁表面
-    if ( FAILED( this->lpddsprimary->Unlock(NULL)))
-        throw runtime_error("Cant Unlock primary");
-    clog << "Unlock!" << endl;
+//                int x = rand() % (client.right - client.left -100) + client.left;
+//                int y = rand() % (client.bottom - client.top -100) + client.top;
+//                clog << "x " << x << endl;
+//                clog << "y " << y << endl;
+//                DWORD color = _RGB32BIT( 0, rand() %100+100, rand() %100+100, rand() %100+100);
+//                for ( int i = 0; 100!=i; ++i)
+//                {
+//                    ++x;
+//                    ++y;
+//                    if ( (x+y*lPitch32) >= ( (client.right - client.left) * (client.bottom - client.top) ) )
+//                    {
+//                        // 超出范围
+//                        break;
+//                    }
+//        //            *((DWORD *)(primary_buffer + x*4 + y*ddsd.lPitch)) = color;
+//                    primary_buffer[ x+y*lPitch32 ] = color;
+//                }
+
+
+                DWORD color = _RGB32BIT( 0, rand() %255, rand() %255, rand() %255);
+                int ax = rand() % (client.right - client.left) + client.left;
+                int bx = rand() % (client.right - ax) + ax;
+                int ay = rand() % (client.bottom - client.top) + client.top;
+                int by = rand() % (client.bottom - ay) + ay;
+                for ( int y = ay ; y != by ; ++y)
+                {
+                    for ( int x = ax ; x != bx ; ++x)
+                    {
+                        if ( (x+y*lPitch32) >= ( (client.right - client.left) * (client.bottom - client.top) ) )
+                        {
+                            // 超出范围
+                            break;
+                        }
+                        primary_buffer[ x+y*lPitch32 ] = color;
+                    }
+                }
+
+
+            }   // End of 32位保护
+
+
+            clog << "Now Unlock" << endl;
+
+            // 解锁表面
+            if ( FAILED( this->lpddsprimary->Unlock(NULL)))
+                throw runtime_error("Cant Unlock primary");
+
+            clog << "Unlock!" << endl;
+
+        }else
+        {
+            // 加锁失败
+            clog << "Lock Fail" << endl;
+//            throw runtime_error("Cant Lock primary");
+            return false;
+        }
+    }else{
+        clog << "Lock Fail" << endl;
+    }
+
+
+
     return true;
 }
 
@@ -289,6 +337,45 @@ bool DirectXControl::TestPaint()
 
 
 
+bool DirectXControl::PrimaryShow()
+{
+    // 初始化结构体
+    DDRAW_INIT_STRUCT(this->ddsd);
+    // 设置有效项目
+    this->ddsd.dwFlags = DDSD_CAPS;
+    // 设置为主显示表面
+    this->ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+    // 创建主显示表面
+    if (FAILED( this->lpdd7->CreateSurface(&ddsd, &lpddsprimary, NULL)))
+    {
+//        throw runtime_error("DirectXControl():CreateSurface()fail");
+        lpddsprimary = NULL;
+        return false;
+    }
+    return true;
+}
+
+bool DirectXControl::PrimaryHide()
+{
+    // 主显示表面
+    if (lpddsprimary)
+        {
+        lpddsprimary->Release();
+        lpddsprimary = NULL;
+        }
+    return true;
+}
+
+bool DirectXControl::PrimaryReFlash()
+{
+    // 重新获取用户区矩形
+    this->GetMainWindowClientRect();
+
+    // 刷新主表面指针
+    this->PrimaryHide();
+    // 返回值是获取结果
+    return this->PrimaryShow();
+}
 
 
 

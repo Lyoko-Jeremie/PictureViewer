@@ -4,6 +4,7 @@
 // 确保 DirectX 的GUID能够使用
 // 例如IID_IDirectDraw7
 #define INITGUID
+// 或者加入dxguid.lib库
 
 // WIN SDK
 #include <windows.h>
@@ -32,6 +33,12 @@ class DirectXControl
         RECT GetMainWindowClientRect();
 
         bool TestPaint();
+
+        bool PrimaryShow();
+
+        bool PrimaryHide();
+
+        bool PrimaryReFlash();
 
 
     protected:

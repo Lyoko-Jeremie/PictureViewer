@@ -16,7 +16,7 @@ LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
 
 void PictrueLast();
 void PictrueNext();
-bool ReDrawing( string filename);
+bool ReDrawing();
 bool initial();
 bool Shutdown();
 
@@ -38,6 +38,8 @@ bool gbMenuIsShow = false;
 HWND gHwnd = nullptr;
 // 程序句柄
 HINSTANCE gHInstance = nullptr;
+// 当前显示文件名
+string gFileName;
 
 // 类型
 typedef unsigned long DWORD;
@@ -85,8 +87,9 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     // 下面两个是附加的运行时间消息，置0即可
     wincl.cbClsExtra = 0;
     wincl.cbWndExtra = 0;
-    // 背景颜色 使用默认背景色画刷
-    wincl.hbrBackground = (HBRUSH) COLOR_BACKGROUND;
+//    // 背景颜色 使用默认背景色画刷
+//    wincl.hbrBackground = (HBRUSH) COLOR_BACKGROUND;
+    wincl.hbrBackground = static_cast<HBRUSH> ( GetStockObject(WHITE_BRUSH) );
 
     // 注册窗口类，失败则退出程序
     if (!RegisterClassEx (&wincl))
@@ -170,6 +173,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
         }
         /**< CPU防满载延迟 */
         Sleep(30);
+        ReDrawing();
     }
 
     Shutdown();
@@ -193,9 +197,11 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 {
     switch (message)                  // 处理消息
     {
+        case WM_CLOSE:
         case WM_DESTROY:
             // 销毁 窗口关闭按钮按下
             // 在这里清除一切
+            glDxc->PrimaryHide();
             PostQuitMessage (0);    // 发送 WM_QUIT 消息退出整个程序
             break;
 
@@ -250,12 +256,60 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         case WM_SIZE:
             // 大小改变
+            // 重新获取表面指针
+//            clog << "WM_SIZE:PrimaryReFlash() " << endl;
+//            clog << glDxc->PrimaryReFlash() << endl;
+            // Windows消息你他妈就是在逗我...你个逗比.FuckYouMother!1
+
             break;
 
         case WM_MOVE:
             // 窗口移动
             // TODO 响应move 并且在用户区绘图
             break;
+
+//        case WM_ACTIVATE:     // 不再处理活动状态了
+            {   // 窗口活动状态改变
+                /**< P:谁被激活了    reinterpret_cast<HWND> lParam  Note:底层转换必须要这样做  */
+                if ( gHwnd == reinterpret_cast<HWND> (lParam) )
+                {   // 是主窗口
+                    if ( WA_INACTIVE==LOWORD(wParam) )
+                    {
+//                        clog << "WM_ACTIVATE:PrimaryHide()" << endl;
+//                        glDxc->PrimaryHide();
+                        /**< 取消激活 */
+                        /**< 测试最小化 */
+                        if ( static_cast<bool> ( HIWORD(wParam) ) )
+                        {
+                            /**< 最小化了 */
+                        }
+                        else
+                        {
+                            /**< 只是失去焦点 */
+                        }
+                    }
+                    else
+                    {
+//                        clog << "WM_ACTIVATE:PrimaryShow()" << endl;
+//                        glDxc->PrimaryShow();
+                        /**< 被激活 */
+                        /**< 测试激活方式 */
+                        if ( WA_ACTIVE==LOWORD(wParam))
+                        {
+                            /**< 非鼠标激活 */
+                        }
+                        else
+                        {
+                            if (WA_CLICKACTIVE==LOWORD(wParam))
+                            {
+                                /**< 由鼠标激活 */
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+
 
         case WM_CREATE:
             // 窗口创建
@@ -353,22 +407,30 @@ void PictrueLast()
 ////        RB - CRB
 //
 //    }
-    ReDrawing("");
+    ReDrawing();
     return;
 }
 
 //下一张图
 void PictrueNext()
 {
-    ReDrawing("");
+    ReDrawing();
     glDxc->TestPaint();
     return;
 }
 
 
 // 重绘
-bool ReDrawing( string filename)
+bool ReDrawing()
 {
+    // for now test if user is hitting ESC and send WM_CLOSE
+    if (KEYDOWN(VK_ESCAPE))
+    {
+        PostMessage(gHwnd,WM_CLOSE,0,0);
+    } // end if
+
+    glDxc->TestPaint();
+
     return true;
 }
 
@@ -380,15 +442,18 @@ bool initial()
     glDxc->SetDisplayMode(
                           static_cast<DWORD> (800),
                           static_cast<DWORD> (600),
-                          static_cast<DWORD> (16)
+                          static_cast<DWORD> (32)
                           );
+    glDxc->PrimaryShow();
     //TODO 读文件
+    // 设置 gFileName
     return true;
 }
 
 // 结束
 bool Shutdown()
 {
+    glDxc->PrimaryHide();
     return true;
 }
 
