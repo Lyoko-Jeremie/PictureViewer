@@ -302,7 +302,6 @@ bool DirectXControl::TestPaint()
 
             }   // End of 32位保护
 
-
             clog << "Now Unlock" << endl;
 
             // 解锁表面

@@ -44,6 +44,7 @@ string gFileName;
 // 类型
 typedef unsigned long DWORD;
 
+
 // 按键检测宏
 //#define KEYDOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
 //#define KEYUP(vk_code)   ((GetAsyncKeyState(vk_code) & 0x8000) ? 0 : 1)
@@ -340,6 +341,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     PictrueNext();
                     break;
 
+                case MENU_DEMO_ID_RAND_COLOER_RECT:
+                    break;
+
+                case MENU_DEMO_ID_RAND_COLOER_LINE:
+                    break;
+
                 case MENU_HELP_ID_ABOUT:
 //                    MessageBox(
 //                               hwnd,
@@ -347,6 +354,18 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 //                               "About Picture Viewer",
 //                               MB_OK | MB_ICONEXCLAMATION
 //                               );
+                    // TODO 关于 的 绘图界面
+
+                    // png : png_get_copyright(NULL)
+
+                    // A "png_get_copyright" function is available, for convenient use in "about"
+                    // boxes and the like:
+                    //
+                    //     printf("%s", png_get_copyright(NULL));
+                    //
+                    // Also, the PNG logo (in PNG format, of course) is supplied in the
+                    // files "pngbar.png" and "pngbar.jpg (88x31) and "pngnow.png" (98x31).
+
                     break;
 
                 default:
@@ -440,8 +459,8 @@ bool initial()
 {
     // 设置显示模式
     glDxc->SetDisplayMode(
-                          static_cast<DWORD> (800),
-                          static_cast<DWORD> (600),
+                          static_cast<DWORD> (1024),
+                          static_cast<DWORD> (768),
                           static_cast<DWORD> (32)
                           );
     glDxc->PrimaryShow();
@@ -458,7 +477,24 @@ bool Shutdown()
 }
 
 
-
-
+// 设置绘制对象
+// object:  bitmap = 1 , demo = 0 , null = -1
+// lpBitMap 位图指针
+bool SetDrawObject( int object, LPBITMAP lpBitMap = nullptr, int demo = 0)
+{
+    if ( -1 == object )
+    {
+        return true;
+    }
+    if ( 0 == object )
+    {
+        return true;
+    }
+    if ( 1 == object )
+    {
+        return true;
+    }
+    return true;
+}
 
 

@@ -1,8 +1,6 @@
 #include "RC.h"
 
-STRINGTABLE
-{
-}
+
 
 MainMenu MENU
 {
@@ -16,6 +14,11 @@ MainMenu MENU
     {
         MENUITEM "上一个（&Last）", MENU_EXPLORER_ID_LAST
         MENUITEM "下一个（&Next）", MENU_EXPLORER_ID_NEXT
+    }
+    POPUP "DEMO（&Demo）"
+    {
+        MENUITEM "随机彩框", MENU_DEMO_ID_RAND_COLOER_RECT
+        MENUITEM "随机彩线", MENU_DEMO_ID_RAND_COLOER_LINE
     }
     POPUP "帮助（&Help）"
     {
