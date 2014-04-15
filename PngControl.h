@@ -14,9 +14,11 @@ using namespace std;
 // 注意 在链接中要链接 libpng.a 和 libz.a
 
 
-typedef unsigned char UCHAR;
-typedef UCHAR *pUCHAR;
-typedef pUCHAR *ppUCHAR;
+typedef unsigned char PCUCHAR;
+typedef PCUCHAR *PCpUCHAR;
+typedef PCpUCHAR *PCppUCHAR;
+
+typedef unsigned int PCUINT;
 
 
 class PngControl
@@ -24,6 +26,7 @@ class PngControl
     public:
 
         PngControl( unsigned int MaxHeighty, unsigned int MaxWidthx );
+        PngControl();
         ~PngControl();
 
         // 检测是否初始化成功
@@ -37,23 +40,25 @@ class PngControl
         bool ReStartPngLib( unsigned int MaxHeighty, unsigned int MaxWidthx );
         bool ReStartPngLib();
 
-        ppUCHAR GetPngPixelArray();
+        // row_pointers 总长度为
+        // UCHAR 的 height * width * channels(RGB=3 , ARGB = 4) * bit_depth(24bit=8)
+        PCppUCHAR GetPngPixelArray();
 
-//        png_uint_32 width = png_get_image_width(png_ptr, info_ptr);
-//
-//        png_uint_32 height = png_get_image_height(png_ptr, info_ptr);
-//
-//        png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
-//
-//        png_byte color_type = png_get_color_type(png_ptr, info_ptr);
-//
-//        // channels 通道数，这里可以知道基本格式
-//        // 返回值对应的通道类型
-//        // 1 (GRAY, PALETTE),
-//        // 2 (GRAY_ALPHA),
-//        // 3 (RGB),
-//        // 4 (RGB_ALPHA or RGB + filler byte)
-//        png_byte channels = png_get_channels(png_ptr, info_ptr);
+        PCUINT GetPngWidth();
+
+        PCUINT GetPngHeight();
+
+        PCUCHAR GetPngBitDepth();
+
+        PCUCHAR GetPngColorType();
+
+        // channels 通道数，这里可以知道基本格式
+        // 返回值对应的通道类型
+        // 1 (GRAY, PALETTE),
+        // 2 (GRAY_ALPHA),
+        // 3 (RGB),
+        // 4 (RGB_ALPHA or RGB + filler byte)
+        PCUCHAR GetPngChannels();
 
     protected:
 
@@ -65,6 +70,10 @@ class PngControl
 
         // 初始化成功标志
         bool AllReady;
+
+        // 成功一半
+        bool HalfReady;
+
         // Note: OpenOK 只能在 AllReady 为真时为真
         // 文件数据读取成功标志
         bool OpenOK;

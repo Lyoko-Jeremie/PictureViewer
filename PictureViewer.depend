@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1397492977 source:h:\github\pictureviewer\main.cpp
+1397593011 source:h:\github\pictureviewer\main.cpp
 	<windows.h>
 	<windowsx.h>
 	<string>
@@ -7,13 +7,15 @@
 	<stdexcept>
 	"RC.h"
 	"DirectXControl.h"
+	"FileList.h"
+	"PngControl.h"
 
 1397142209 source:h:\github\pictureviewer\mainmenu.rc
 	"MainMenu.h"
 
 1397142235 h:\github\pictureviewer\mainmenu.h
 
-1397492996 source:h:\github\pictureviewer\directxcontrol.cpp
+1397593082 source:h:\github\pictureviewer\directxcontrol.cpp
 	"DirectXControl.h"
 	<stdexcept>
 	<iostream>
@@ -21,7 +23,7 @@
 	<windowsx.h>
 	<ddraw.h>
 
-1397357825 h:\github\pictureviewer\directxcontrol.h
+1397592939 h:\github\pictureviewer\directxcontrol.h
 	<windows.h>
 	<ddraw.h>
 
@@ -59,19 +61,35 @@
 1397460574 h:\github\pictureviewer\imagecontrol.h
 	<png.h>
 
-1397497304 source:h:\github\pictureviewer\pngcontrol.cpp
+1397585404 source:h:\github\pictureviewer\pngcontrol.cpp
 	"PngControl.h"
 	<iostream>
 	<cstdio>
 	<png.h>
 
-1397497245 h:\github\pictureviewer\pngcontrol.h
+1397584221 h:\github\pictureviewer\pngcontrol.h
 	<iostream>
 	<cstdio>
+	<string>
 	<png.h>
 
 1397496929 source:h:\github\pictureviewer\pnglibcontrol.cpp
 	<iostream>
 	<cstdio>
 	<png.h>
+
+1397581385 source:h:\github\pictureviewer\filelist.cpp
+	"FileList.h"
+	<string>
+	<vector>
+	<iostream>
+	<stdexcept>
+	<windows.h>
+	<winbase.h>
+
+1397579137 h:\github\pictureviewer\filelist.h
+	<string>
+	<vector>
+	<windows.h>
+	<winbase.h>
 

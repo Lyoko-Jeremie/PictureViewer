@@ -40,6 +40,8 @@
 			<Add library="user32" />
 			<Add library="kernel32" />
 			<Add library="comctl32" />
+			<Add library="lpng1610\libpng.a" />
+			<Add library="zlib128\libz.a" />
 		</Linker>
 		<Unit filename="DirectXControl.cpp" />
 		<Unit filename="DirectXControl.h" />

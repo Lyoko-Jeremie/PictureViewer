@@ -10,6 +10,10 @@ using namespace std;
 #include "RC.h"
 // DirectXControl包装类
 #include "DirectXControl.h"
+// 文件信息数据列表包装类
+#include "FileList.h"
+// Png解析库包装类
+#include "PngControl.h"
 
 /*  消息回调函数  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -19,16 +23,26 @@ void PictrueNext();
 bool ReDrawing();
 bool initial();
 bool Shutdown();
+bool OpenIndexPngFile( unsigned int Index);
+bool ClosePngFile();
 
 /*  将类名保存在全局变量中  */
 char szClassName[ ] = "PictureViewer";
 
 // 控制结构指针
-DirectXControl *glDxc = nullptr;
+DirectXControl *gpDxc = nullptr;
+// Png库指针
+PngControl *gpPngCDate = nullptr;
+// 文件列表指针
+FileList *gpFileListDate = nullptr;
+// 当前文件列表编号索引
+size_t gsFileIndex = 0;
 
-// 窗口设置
-const DWORD gwWidth = 800;
-const DWORD gwHeight =  600;
+// 当前显示内容
+int giShowType = 0;
+// Demo内容
+int giDemoType = 0;
+
 
 // 菜单句柄
 HMENU ghMenuHandle = nullptr;
@@ -38,11 +52,30 @@ bool gbMenuIsShow = false;
 HWND gHwnd = nullptr;
 // 程序句柄
 HINSTANCE gHInstance = nullptr;
-// 当前显示文件名
-string gFileName;
 
 // 类型
 typedef unsigned long DWORD;
+typedef unsigned char UCHAR;
+
+// 图像结构体
+struct IMAGE{
+    public:
+        PCppUCHAR ppImage;
+        PCUINT Width;
+        PCUINT Height;
+        PCUCHAR BitDepth;
+        PCUCHAR ColorType;
+        PCUCHAR Channels;
+        IMAGE():ppImage(nullptr),Width(0),Height(0),BitDepth(0),ColorType(0),Channels(0){}
+};
+typedef IMAGE *pIMAGE;
+
+// 全局图像结构体指针
+pIMAGE gpImageDate = nullptr;
+
+
+
+bool DrawObject( int object, pIMAGE pImage = nullptr, int demo = 0);
 
 
 // 按键检测宏
@@ -141,13 +174,41 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     DirectXControl dxc(hwnd,true);
     // 检测是否创建成功
     if ( !dxc.AreInitiSccess() )
+    {
+        clog << "DirectXControl Create Fail." << endl;
         return -1;
+    }
     // 指针指向
-    glDxc = &dxc;
+    gpDxc = &dxc;
+
+    // 初始化文件列表
+    FileList FileListDate(".\\png\\*.png");
+    if ( !FileListDate.GetSize() )
+    {
+        clog << "No Png File." << endl;
+        giShowType = 0;
+//        return -1;
+    }
+    gpFileListDate = &FileListDate;
+
+    // 初始化图像结构体对象
+    IMAGE ImageDate;
+    gpImageDate = &ImageDate;
+
+    // 初始化Png库
+    PngControl PngCDate( 4000, 2000);   // 大约一般屏幕两倍大
+    if ( !PngCDate.AreInitiSccess() )
+    {
+        clog << "Png Lib Initial Fail." << endl;
+        return -1;
+    }
+    gpPngCDate = &PngCDate;
+
     initial();
 
+
     // 确保运行在32位色深下      // 无所谓了 反证全屏
-//    if ( glDxc->GetPixelFormat() != 32 )
+//    if ( gpDxc->GetPixelFormat() != 32 )
 //    {
 ////        throw runtime_error("Must run in 32-bit color depth environments.");
 //        return 0;
@@ -179,8 +240,9 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 
     Shutdown();
     // 释放
-    glDxc = nullptr;
+    gpDxc = nullptr;
     // 程序结束会自动析构dxc局部对象
+    gpFileListDate = nullptr;
 
 
     // 程序返回值，返回PostQuitMessage()函数的参数
@@ -202,7 +264,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case WM_DESTROY:
             // 销毁 窗口关闭按钮按下
             // 在这里清除一切
-            glDxc->PrimaryHide();
+            gpDxc->PrimaryHide();
             PostQuitMessage (0);    // 发送 WM_QUIT 消息退出整个程序
             break;
 
@@ -235,31 +297,16 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             }
             break;
 
-        case WM_KEYDOWN:
-            if ( KEYDOWN( VK_ESCAPE ) )
-            {
-                // 发送退出消息
-                PostMessage( hwnd, WM_DESTROY, 0, 0);
-                return 0;
-            }
-            if ( KEYDOWN( VK_LEFT ) )
-            {
-                // 左箭头
-                PictrueLast();
-            }
-            if ( KEYDOWN( VK_RIGHT ) )
-            {
-                // 右箭头
-                PictrueNext();
-            }
-            // 按键按下
-            break;
+//        case WM_KEYDOWN:
+//            // 这里不处理，真麻烦
+//            // 按键按下
+//            break;
 
         case WM_SIZE:
             // 大小改变
             // 重新获取表面指针
 //            clog << "WM_SIZE:PrimaryReFlash() " << endl;
-//            clog << glDxc->PrimaryReFlash() << endl;
+//            clog << gpDxc->PrimaryReFlash() << endl;
             // Windows消息你他妈就是在逗我...你个逗比.FuckYouMother!1
 
             break;
@@ -277,7 +324,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     if ( WA_INACTIVE==LOWORD(wParam) )
                     {
 //                        clog << "WM_ACTIVATE:PrimaryHide()" << endl;
-//                        glDxc->PrimaryHide();
+//                        gpDxc->PrimaryHide();
                         /**< 取消激活 */
                         /**< 测试最小化 */
                         if ( static_cast<bool> ( HIWORD(wParam) ) )
@@ -292,7 +339,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     else
                     {
 //                        clog << "WM_ACTIVATE:PrimaryShow()" << endl;
-//                        glDxc->PrimaryShow();
+//                        gpDxc->PrimaryShow();
                         /**< 被激活 */
                         /**< 测试激活方式 */
                         if ( WA_ACTIVE==LOWORD(wParam))
@@ -388,15 +435,32 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 // 上一张图
 void PictrueLast()
 {
-    // 测试像素位数【结果为32】
-    clog << glDxc->GetPixelFormat() << endl;
+    // 清空
+    ClosePngFile();
+    // 清屏
+    gpDxc->ClearScreen();
+    // 打开
+    size_t index = ( 0 != gsFileIndex ? gsFileIndex - 1 : gpFileListDate->GetSize() - 1 );
+    if ( OpenIndexPngFile( index ) )
     {
-        RECT a = glDxc->GetMainWindowClientRect();
-        clog << "left " << a.left << endl;
-        clog << "right " << a.right << endl;
-        clog << "top " << a.top << endl;
-        clog << "bottom " << a.bottom << endl;
+        giShowType = 1;
     }
+    else
+    {
+        giShowType = 0;
+    }
+
+    ReDrawing();
+/*  Test
+//    // 测试像素位数【结果为32】
+//    clog << gpDxc->GetPixelFormat() << endl;
+//    {
+//        RECT a = gpDxc->GetMainWindowClientRect();
+//        clog << "left " << a.left << endl;
+//        clog << "right " << a.right << endl;
+//        clog << "top " << a.top << endl;
+//        clog << "bottom " << a.bottom << endl;
+//    }
 //    {   // Test
 //        RECT MainWindowRect;
 //        RECT MainWindowClientRect;
@@ -426,15 +490,29 @@ void PictrueLast()
 ////        RB - CRB
 //
 //    }
-    ReDrawing();
+*/
     return;
 }
 
 //下一张图
 void PictrueNext()
 {
+    // 清空
+    ClosePngFile();
+    // 清屏
+    gpDxc->ClearScreen();
+    // 打开
+    size_t index = ( gpFileListDate->GetSize() - 1 != gsFileIndex ? gsFileIndex + 1 : 0 );
+    if ( OpenIndexPngFile( index ) )
+    {
+        giShowType = 1;
+    }
+    else
+    {
+        giShowType = 0;
+    }
+
     ReDrawing();
-    glDxc->TestPaint();
     return;
 }
 
@@ -447,9 +525,23 @@ bool ReDrawing()
     {
         PostMessage(gHwnd,WM_CLOSE,0,0);
     } // end if
-
-    glDxc->TestPaint();
-
+    if ( KEYDOWN( VK_ESCAPE ) )
+    {
+        // 发送退出消息
+        PostMessage( gHwnd, WM_DESTROY, 0, 0);
+        return 0;
+    }
+    if ( KEYDOWN( VK_NEXT ) )
+    {
+        // Page Down
+        PictrueNext();
+    }
+    if ( KEYDOWN( VK_PRIOR ) )
+    {
+        // Page Up
+        PictrueLast();
+    }
+    DrawObject( giShowType, gpImageDate, giDemoType);
     return true;
 }
 
@@ -457,44 +549,195 @@ bool ReDrawing()
 // 初始化
 bool initial()
 {
+
+    // 获取当前屏幕设置
+    unsigned int ScreenWide = GetSystemMetrics( SM_CXSCREEN );
+    unsigned int ScreenHeight = GetSystemMetrics( SM_CYSCREEN );
+
     // 设置显示模式
-    glDxc->SetDisplayMode(
-                          static_cast<DWORD> (1024),
-                          static_cast<DWORD> (768),
+    gpDxc->SetDisplayMode(
+                          static_cast<DWORD> (ScreenWide),
+                          static_cast<DWORD> (ScreenHeight),
                           static_cast<DWORD> (32)
                           );
-    glDxc->PrimaryShow();
-    //TODO 读文件
-    // 设置 gFileName
+    gpDxc->PrimaryShow();
+
+    // 第一张图
+    if ( gpFileListDate->GetSize() )
+    {
+        // 有图片
+
+        if ( OpenIndexPngFile(0) )
+        {
+            // 成功打开，显示图片
+            giShowType = 1;
+        }
+        else
+        {
+            // 打开失败，显示Demo
+            giShowType = 0;
+        }
+
+    }
+
     return true;
 }
 
 // 结束
 bool Shutdown()
 {
-    glDxc->PrimaryHide();
+    gpDxc->PrimaryHide();
     return true;
 }
 
 
-// 设置绘制对象
-// object:  bitmap = 1 , demo = 0 , null = -1
-// lpBitMap 位图指针
-bool SetDrawObject( int object, LPBITMAP lpBitMap = nullptr, int demo = 0)
+// 绘制对象
+// object:  null = -1 , demo = 0 , Image = 1 , about = 2
+// pImage 位图指针
+bool DrawObject( int object, pIMAGE pImage /*= nullptr*/, int demo /*= 0*/)
 {
     if ( -1 == object )
     {
+        // Empty
         return true;
     }
     if ( 0 == object )
     {
+        gpDxc->TestPaint(demo);
         return true;
     }
     if ( 1 == object )
+    {
+        if ( KEYDOWN( VK_LEFT ) )
+        {
+            gpDxc->SetBaseX( gpDxc->GetBaseX() - 5 );
+            // 左箭头
+        }
+        if ( KEYDOWN( VK_RIGHT ) )
+        {
+            gpDxc->SetBaseX( gpDxc->GetBaseX() + 5 );
+            // 右箭头
+        }
+        if ( KEYDOWN( VK_UP ) )
+        {
+            gpDxc->SetBaseY( gpDxc->GetBaseY() - 5 );
+            // 上箭头
+        }
+        if ( KEYDOWN( VK_DOWN ) )
+        {
+            gpDxc->SetBaseY( gpDxc->GetBaseY() + 5 );
+            // 下箭头
+        }
+        if ( VK_HOME )
+        {
+            gpDxc->SetBaseX( 0 );
+            gpDxc->SetBaseY( 0 );
+            // Home
+        }
+        // 附着到对象
+        IMAGE &atImageDate = *gpImageDate;
+        gpDxc->PaintImage(
+                          atImageDate.ppImage,
+                          atImageDate.Width,
+                          atImageDate.Height,
+                          atImageDate.BitDepth,
+                          atImageDate.ColorType,
+                          atImageDate.Channels
+                          );
+        return true;
+    }
+    if ( 2 == object )
     {
         return true;
     }
     return true;
 }
+
+
+
+bool OpenIndexPngFile( unsigned int Index)
+{
+        // 读取
+        gsFileIndex = Index;
+        if ( gpPngCDate->OpenPngFile( ".\\png\\" + gpFileListDate->GetFileOnlyName( gsFileIndex ) ) )
+        {
+            // 正确打开
+            if ( gpPngCDate->AreOpenSccess() && gpPngCDate->AreOpenSccess() )
+            {
+                // 附着到对象
+                IMAGE &atImageDate = *gpImageDate;
+
+                // 填结构体
+                atImageDate.Width = gpPngCDate->GetPngWidth();
+                atImageDate.Height = gpPngCDate->GetPngHeight();
+                atImageDate.BitDepth = gpPngCDate->GetPngBitDepth();
+                atImageDate.ColorType = gpPngCDate->GetPngColorType();
+                atImageDate.Channels = gpPngCDate->GetPngChannels();
+                atImageDate.ppImage = gpPngCDate->GetPngPixelArray();
+
+                // 有效性检测
+                if (
+                    atImageDate.BitDepth
+                    &&
+                    atImageDate.Channels
+                    &&
+                    atImageDate.ColorType
+                    &&
+                    atImageDate.Height
+                    &&
+                    atImageDate.Height
+                    &&
+                    atImageDate.Width
+                    )
+                {
+                    // 全不为0
+                    // UCHAR 的 height * width * channels(RGB=3 , ARGB = 4) * bit_depth(24bit=8)
+                    clog << "OpenIndexPngFile:PngAreOpen" << endl;
+                    clog << "\nWidth: " << atImageDate.Width
+                            << "\tBitDepth: " << atImageDate.BitDepth
+                            << "\tColorType: " << atImageDate.ColorType
+                            << "\tChannels: " << atImageDate.Channels << endl;
+                    giShowType = 1;
+                }else{
+                    // 恢复结构体
+                    atImageDate.Width = 0;
+                    atImageDate.Height = 0;
+                    atImageDate.BitDepth = 0;
+                    atImageDate.ColorType = 0;
+                    atImageDate.Channels = 0;
+                    atImageDate.ppImage = nullptr;
+                    gpDxc->SetBaseX( 0 );
+                    gpDxc->SetBaseY( 0 );
+                }
+
+            }
+        }else{
+            clog << "OpenIndexPngFile:PngAreOpenFail" << endl;
+            gpPngCDate->ReStartPngLib();
+        }
+
+    return true;
+}
+
+
+bool ClosePngFile()
+{
+    clog << "ClosePngFile" << endl;
+    giShowType = -1;    // 不显示
+    gpPngCDate->ReStartPngLib();
+    // 附着到对象
+    IMAGE &atImageDate = *gpImageDate;
+    // 恢复结构体
+    atImageDate.Width = 0;
+    atImageDate.Height = 0;
+    atImageDate.BitDepth = 0;
+    atImageDate.ColorType = 0;
+    atImageDate.Channels = 0;
+    atImageDate.ppImage = nullptr;
+    gpDxc->SetBaseX( 0 );
+    gpDxc->SetBaseY( 0 );
+    return true;
+}
+
 
 

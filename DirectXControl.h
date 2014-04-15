@@ -32,13 +32,20 @@ class DirectXControl
         // 用户区坐标
         RECT GetMainWindowClientRect();
 
-        bool TestPaint();
+        bool TestPaint( int type, unsigned int runtimes = 3);
+        bool PaintImage( UCHAR **ppImage, unsigned int Wide, unsigned int Height, UCHAR BitDepth, UCHAR ColorType, UCHAR Channels );
+        bool ClearScreen();
 
         bool PrimaryShow();
 
         bool PrimaryHide();
 
         bool PrimaryReFlash();
+
+        bool SetBaseX( int i);
+        int GetBaseX();
+        bool SetBaseY( int i);
+        int GetBaseY();
 
 
     protected:
@@ -64,6 +71,9 @@ class DirectXControl
         int MainWindowBPP;
         // 绘制表面
         LPDIRECTDRAWSURFACE7 lpddsprimary;
+        // 图像基偏移
+        int BaseX;
+        int BaseY;
 
 //        // 设置宽高
 //        DWORD dwWidth;

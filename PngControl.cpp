@@ -15,9 +15,28 @@ using namespace std;
 
 // Note: 每个函数都要setjmp一下，权作try
 
+PngControl::PngControl():
+    AllReady(false),
+    OpenOK(false),
+    png_ptr(nullptr),
+    info_ptr(nullptr),
+    p_png_file(nullptr),
+    MaxHeight(0),
+    MaxWidth(0)
+{
+    if ( !this->PngLibCreate() )
+    {
+        AllReady = false;
+        return;
+    }
+    AllReady = true;
+    return;
+}
+
 
 PngControl::PngControl( unsigned int MaxHeighty, unsigned int MaxWidthx ):
     AllReady(false),
+    HalfReady(false),
     OpenOK(false),
     png_ptr(nullptr),
     info_ptr(nullptr),
@@ -28,12 +47,16 @@ PngControl::PngControl( unsigned int MaxHeighty, unsigned int MaxWidthx ):
 
     if ( !this->PngLibCreate() )
     {
+        clog << "PngControl:ctor:PngLibCreateFailed" << endl;
         AllReady = false;
         return;
     }
 
+    HalfReady = true;
+
     if ( !this->SetMaxHW( MaxHeight, MaxWidth) )
     {
+        clog << "PngControl:ctor:SetMaxHWFailed" << endl;
         AllReady = false;
         return;
     }
@@ -61,9 +84,11 @@ bool PngControl::AreOpenSccess()
 
 bool PngControl::OpenPngFile(string File)
 {
-    if ( AreInitiSccess() && !AreOpenSccess() )
+    if ( !AreInitiSccess() || AreOpenSccess() )
     {
-        clog << "PngControl:OpenPngFile:PremiseFailed" << endl;
+        clog << "PngControl:OpenPngFile:PremiseFailed"
+                << "\n!AreInitiSccess: " << !AreInitiSccess()
+                << "\tAreOpenSccess: " << AreOpenSccess() << endl;
         return false;
     }
     // 异常处理
@@ -81,7 +106,7 @@ bool PngControl::OpenPngFile(string File)
 
         // 新建文件指针
         // 文件指针要求以二进制读方式打开
-        this->p_png_file = fopen( "a.png", "rb");
+        this->p_png_file = fopen( File.c_str(), "rb");
         if ( !(this->p_png_file) )
         {
             // 打开失败
@@ -111,7 +136,7 @@ bool PngControl::OpenPngFile(string File)
 }
 
 
-ppUCHAR PngControl::GetPngPixelArray()
+PCppUCHAR PngControl::GetPngPixelArray()
 {
     if ( !AreInitiSccess() || !AreOpenSccess() )
     {
@@ -127,11 +152,12 @@ ppUCHAR PngControl::GetPngPixelArray()
 
 bool PngControl::ReStartPngLib(unsigned int MaxHeighty, unsigned int MaxWidthx)
 {
-    if ( !this->SetMaxHW( MaxHeighty, MaxWidthx ) )
+    if ( !this->ReStartPngLib() )
     {
         return false;
     }
-    if ( !this->ReStartPngLib() )
+    HalfReady = true;
+    if ( !this->SetMaxHW( MaxHeighty, MaxWidthx ) )
     {
         return false;
     }
@@ -141,6 +167,7 @@ bool PngControl::ReStartPngLib(unsigned int MaxHeighty, unsigned int MaxWidthx)
 
 bool PngControl::ReStartPngLib()
 {
+    clog << "PngControl:ReStartPngLib" << endl;
     this->PngLibRelase();
     return this->PngLibCreate();
 }
@@ -178,6 +205,9 @@ bool PngControl::PngLibCreate()
     }
 
     AllReady = true;
+    HalfReady = true;
+
+    clog << "PngControl:PngLibCreate:Create" << endl;
 
     return true;
 }
@@ -185,11 +215,14 @@ bool PngControl::PngLibCreate()
 bool PngControl::PngLibRelase()
 {
 
+    clog << "PngControl:PngLibRelase:Relase" << endl;
+
     // 释放
     png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
     this->png_ptr = nullptr;
     this->info_ptr = nullptr;
     AllReady = false;
+    HalfReady = false;
     OpenOK = false;
 
     return true;
@@ -197,9 +230,9 @@ bool PngControl::PngLibRelase()
 
 bool PngControl::SetMaxHW( unsigned int MaxHeighty, unsigned int MaxWidthx )
 {
-    if ( AreInitiSccess() && !AreOpenSccess() )
+    if ( !this->HalfReady && !AreOpenSccess() )
     {
-        clog << "PngControl:OpenPngFile:PremiseFailed" << endl;
+        clog << "PngControl:SetMaxHW:PremiseFailed" << endl;
         return false;
     }
 
@@ -225,4 +258,53 @@ bool PngControl::SetMaxHW( unsigned int MaxHeighty, unsigned int MaxWidthx )
 
 
 
+PCUINT PngControl::GetPngWidth()
+{
+    if ( !AreInitiSccess() || !AreOpenSccess() )
+    {
+        clog << "PngControl:GetPngWidth:PremiseFailed" << endl;
+        return 0;
+    }
+    return png_get_image_width(png_ptr, info_ptr);
+}
+
+PCUINT PngControl::GetPngHeight()
+{
+    if ( !AreInitiSccess() || !AreOpenSccess() )
+    {
+        clog << "PngControl:GetPngHeight:PremiseFailed" << endl;
+        return 0;
+    }
+    return png_get_image_height(png_ptr, info_ptr);
+}
+
+PCUCHAR PngControl::GetPngBitDepth()
+{
+    if ( !AreInitiSccess() || !AreOpenSccess() )
+    {
+        clog << "PngControl:GetPngBitDepth:PremiseFailed" << endl;
+        return 0;
+    }
+    return png_get_bit_depth(png_ptr, info_ptr);
+}
+
+PCUCHAR PngControl::GetPngColorType()
+{
+    if ( !AreInitiSccess() || !AreOpenSccess() )
+    {
+        clog << "PngControl:GetPngColorType:PremiseFailed" << endl;
+        return 0;
+    }
+    return png_get_color_type(png_ptr, info_ptr);
+}
+
+PCUCHAR PngControl::GetPngChannels()
+{
+    if ( !AreInitiSccess() || !AreOpenSccess() )
+    {
+        clog << "PngControl:GetPngChannels:PremiseFailed" << endl;
+        return 0;
+    }
+    return png_get_channels(png_ptr, info_ptr);
+}
 

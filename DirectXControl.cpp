@@ -48,7 +48,9 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
     MainWindowHandle(hwnd),
     MainWindowRect( {0,0,0,0} ),
     MainWindowClientRect( {0,0,0,0} ),
-    MainWindowBPP(0)
+    MainWindowBPP(0),
+    BaseX(0),
+    BaseY(0)
 {
     // 初始化结构体
     DDRAW_INIT_STRUCT(this->ddsd);
@@ -95,7 +97,6 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
 
 DirectXControl::~DirectXControl()
 {
-
     // 接口
     if (lpdd7)
        {
@@ -140,6 +141,11 @@ bool DirectXControl::SetDisplayMode(
 // 获取窗口像素格式
 int DirectXControl::GetPixelFormat()
 {
+    if ( !lpddsprimary )     // 表面指针无效
+    {
+        throw logic_error("DirectXControl().GetPixelFormat():Nullptr:lpddsprimary");
+        return 0;
+    }
     //像素格式
     DDPIXELFORMAT ddpixelformat;
     // 清空和初始化像素格式
@@ -221,7 +227,7 @@ RECT DirectXControl::GetMainWindowClientRect()
 
 
 
-bool DirectXControl::TestPaint()
+bool DirectXControl::TestPaint( int type, unsigned int runtimes )
 {
 
     if ( lpddsprimary )     // 表面指针有效
@@ -261,41 +267,48 @@ bool DirectXControl::TestPaint()
                 DWORD *primary_buffer = (DWORD *)ddsd.lpSurface;
                 // 32位绘图
 
-
-//                int x = rand() % (client.right - client.left -100) + client.left;
-//                int y = rand() % (client.bottom - client.top -100) + client.top;
-//                clog << "x " << x << endl;
-//                clog << "y " << y << endl;
-//                DWORD color = _RGB32BIT( 0, rand() %100+100, rand() %100+100, rand() %100+100);
-//                for ( int i = 0; 100!=i; ++i)
-//                {
-//                    ++x;
-//                    ++y;
-//                    if ( (x+y*lPitch32) >= ( (client.right - client.left) * (client.bottom - client.top) ) )
-//                    {
-//                        // 超出范围
-//                        break;
-//                    }
-//        //            *((DWORD *)(primary_buffer + x*4 + y*ddsd.lPitch)) = color;
-//                    primary_buffer[ x+y*lPitch32 ] = color;
-//                }
-
-
-                DWORD color = _RGB32BIT( 0, rand() %255, rand() %255, rand() %255);
-                int ax = rand() % (client.right - client.left) + client.left;
-                int bx = rand() % (client.right - ax) + ax;
-                int ay = rand() % (client.bottom - client.top) + client.top;
-                int by = rand() % (client.bottom - ay) + ay;
-                for ( int y = ay ; y != by ; ++y)
+                if ( 2 == type )
                 {
-                    for ( int x = ax ; x != bx ; ++x)
+                    for ( unsigned int r = 0; r != runtimes; ++r)
                     {
-                        if ( (x+y*lPitch32) >= ( (client.right - client.left) * (client.bottom - client.top) ) )
+                        int x = rand() % (client.right - client.left -100) + client.left;
+                        int y = rand() % (client.bottom - client.top -100) + client.top;
+                        clog << "x " << x << endl;
+                        clog << "y " << y << endl;
+                        DWORD color = _RGB32BIT( 0, rand() %100+100, rand() %100+100, rand() %100+100);
+                        for ( int i = 0; 100!=i; ++i)
                         {
-                            // 超出范围
-                            break;
+                            ++x;
+                            ++y;
+                            if ( (x+y*lPitch32) >= ( (client.right - client.left) * (client.bottom - client.top) ) )
+                            {
+                                // 超出范围
+                                break;
+                            }
+                //            *((DWORD *)(primary_buffer + x*4 + y*ddsd.lPitch)) = color;
+                            primary_buffer[ x+y*lPitch32 ] = color;
                         }
-                        primary_buffer[ x+y*lPitch32 ] = color;
+                    }
+                }
+
+                if ( 1 == type )
+                {
+                    DWORD color = _RGB32BIT( 0, rand() %255, rand() %255, rand() %255);
+                    int ax = rand() % (client.right - client.left) + client.left;
+                    int bx = rand() % (client.right - ax) + ax;
+                    int ay = rand() % (client.bottom - client.top) + client.top;
+                    int by = rand() % (client.bottom - ay) + ay;
+                    for ( int y = ay ; y != by ; ++y)
+                    {
+                        for ( int x = ax ; x != bx ; ++x)
+                        {
+                            if ( (x+y*lPitch32) >= ( (client.right - client.left) * (client.bottom - client.top) ) )
+                            {
+                                // 超出范围
+                                break;
+                            }
+                            primary_buffer[ x+y*lPitch32 ] = color;
+                        }
                     }
                 }
 
@@ -338,6 +351,11 @@ bool DirectXControl::TestPaint()
 
 bool DirectXControl::PrimaryShow()
 {
+    if ( !lpdd7 )
+    {
+        throw logic_error("DirectXControl().PrimaryShow():Nullptr:lpdd7");
+        return false;
+    }
     // 初始化结构体
     DDRAW_INIT_STRUCT(this->ddsd);
     // 设置有效项目
@@ -375,6 +393,260 @@ bool DirectXControl::PrimaryReFlash()
     // 返回值是获取结果
     return this->PrimaryShow();
 }
+
+
+
+
+// channels 通道数，这里可以知道基本格式
+// 返回值对应的通道类型
+// 1 (GRAY, PALETTE),
+// 2 (GRAY_ALPHA),
+// 3 (RGB),
+// 4 (RGB_ALPHA or RGB + filler byte)
+// UCHAR **ppImage 的大小 height * width * channels(RGB=3 , ARGB = 4) * bit_depth(24bit=8)
+bool DirectXControl::PaintImage(
+                                UCHAR **ppImage,
+                                unsigned int Wide,
+                                unsigned int Height,
+                                UCHAR BitDepth,
+                                UCHAR ColorType,
+                                UCHAR Channels
+                                )
+{
+
+    // 预检查
+    // ColorType 不管
+    // BitDepth=8
+    // Channels= 3 or 4     【3为24位  4为32位】
+    if ( !(8 == BitDepth && ( 3 == Channels || 4 == Channels ) ) )
+    {
+        clog << "DirectXControl:PaintImage:PremiseFailed"
+                << "\nBitDepth: " << static_cast<int>(BitDepth)
+                << "\tChannels: " << static_cast<int>(Channels) << endl;
+        return false;
+    }
+
+    if ( lpddsprimary )     // 表面指针有效
+    {
+        // 获取区域
+        RECT client = this->GetMainWindowClientRect();
+
+        // 获取句柄
+        this->DDRAW_INIT_STRUCT(ddsd);
+
+
+        clog << "Now Lock" << endl;
+
+        // 加锁表面
+        if ( SUCCEEDED(
+                        this->lpddsprimary->Lock(
+                                                NULL,&(this->ddsd),
+                                                DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,
+                                                NULL
+                                                )
+                        )
+            )
+        {
+            // 成功加锁
+            clog << "Lock!" << endl;
+
+
+            clog << "ddsd.lPitch " << ddsd.lPitch << endl;
+
+            // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
+            LONG lPitch32 = ddsd.lPitch >> 2;
+
+            // 32位保护
+            if ( 32 == this->GetPixelFormat() )
+            {
+                // 获取表面指针
+                DWORD *primary_buffer = (DWORD *)ddsd.lpSurface;
+                // 32位绘图
+
+                // 偏移保护
+                if ( ( (static_cast<int>(Height) - this->BaseY) > 0 ) || ( (static_cast<int>(Wide) - this->BaseX) > 0) )
+                {
+                    // 选小
+                    unsigned int yLimit = ( static_cast<unsigned int>(client.bottom - client.top) > static_cast<unsigned int>(static_cast<int>(Height) - this->BaseY) ? static_cast<unsigned int>(static_cast<int>(Height) - this->BaseY) : static_cast<unsigned int>(client.bottom - client.top) );
+                    unsigned int xLimit = ( static_cast<unsigned int>(client.right - client.left) > static_cast<unsigned int>(static_cast<int>(Wide) - this->BaseX) ? static_cast<unsigned int>(static_cast<int>(Wide) - this->BaseX) : static_cast<unsigned int>(client.right - client.left) );
+                    clog << "BaseY:" << this->BaseY
+                            << "\tBaseX:" << this->BaseX << endl;
+
+                    for ( unsigned int y = 0; yLimit != y; ++y)
+                    {
+                        unsigned int yImage = y - this->BaseY;
+                        if ( yImage > 0 )
+                        {
+                            UCHAR *pImage = ppImage[y];
+                            for ( unsigned int x = 0; xLimit != x; ++x)
+                            {
+                                unsigned int xImage = x - this->BaseX;
+                                if ( xImage > 0 )
+                                {
+                                    unsigned int ImageBit = xImage *3;
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                                    0,
+                                                                                                                    pImage[ImageBit],
+                                                                                                                    pImage[ImageBit+1],
+                                                                                                                    pImage[ImageBit+2]
+                                                                                                                    );
+                                }
+                            }
+                        }
+                    }
+
+
+
+                }else{
+                    clog << "BaseProtect\n"
+                            << "(static_cast<int>(Height) - BaseY):" << (static_cast<int>(Height) - BaseY)
+                            << "\t(static_cast<int>(Height) - BaseY):" << (static_cast<int>(Height) - BaseY) << endl;
+                }
+
+            }   // End of 32位保护
+
+            clog << "Now Unlock" << endl;
+
+            // 解锁表面
+            if ( FAILED( this->lpddsprimary->Unlock(NULL)))
+                throw runtime_error("Cant Unlock primary");
+
+            clog << "Unlock!" << endl;
+
+        }else
+        {
+            // 加锁失败
+            clog << "Lock Fail" << endl;
+//            throw runtime_error("Cant Lock primary");
+            return false;
+        }
+    }else{
+        clog << "Lock Fail" << endl;
+    }
+
+
+
+    return true;
+}
+
+
+
+bool DirectXControl::ClearScreen()
+{
+
+    if ( lpddsprimary )     // 表面指针有效
+    {
+        // 获取区域
+        RECT client = this->GetMainWindowClientRect();
+
+        // 获取句柄
+        this->DDRAW_INIT_STRUCT(ddsd);
+
+
+        clog << "Now Lock" << endl;
+
+        // 加锁表面
+        if ( SUCCEEDED(
+                       this->lpddsprimary->Lock(
+                                                NULL,&(this->ddsd),
+                                                DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,
+                                                NULL
+                                                )
+                        )
+            )
+        {
+            // 成功加锁
+            clog << "Lock!" << endl;
+
+
+            clog << "ddsd.lPitch " << ddsd.lPitch << endl;
+
+            // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
+            LONG lPitch32 = ddsd.lPitch >> 2;
+
+            // 32位保护
+            if ( 32 == this->GetPixelFormat() )
+            {
+                // 获取表面指针
+                DWORD *primary_buffer = (DWORD *)ddsd.lpSurface;
+                // 32位绘图
+
+                // 全屏
+                unsigned int yLimit = static_cast<unsigned int>(client.bottom);
+                unsigned int xLimit = static_cast<unsigned int>(client.right);
+
+                // 随机色
+                DWORD PureColor = _RGB32BIT( 0, rand()%255, rand()%255, rand()%255);
+
+                for ( unsigned int y = 0; yLimit != y; ++y)
+                {
+                    for ( unsigned int x = 0; xLimit != x; ++x)
+                    {
+                        primary_buffer[ x + y*lPitch32 ] = PureColor;
+                    }
+                }
+
+
+
+            }   // End of 32位保护
+
+            clog << "Now Unlock" << endl;
+
+            // 解锁表面
+            if ( FAILED( this->lpddsprimary->Unlock(NULL)))
+                throw runtime_error("Cant Unlock primary");
+
+            clog << "Unlock!" << endl;
+
+        }else
+        {
+            // 加锁失败
+            clog << "Lock Fail" << endl;
+//            throw runtime_error("Cant Lock primary");
+            return false;
+        }
+    }else{
+        clog << "Lock Fail" << endl;
+    }
+
+
+
+    return true;
+}
+
+
+
+
+
+bool DirectXControl::SetBaseX(int i)
+{
+    clog << "SetBaseX" << endl;
+    this->BaseX = i;
+    return true;
+}
+
+int DirectXControl::GetBaseX()
+{
+    return this->BaseX;
+}
+
+bool DirectXControl::SetBaseY(int i)
+{
+    clog << "SetBaseY" << endl;
+    this->BaseY = i;
+    return true;
+}
+
+int DirectXControl::GetBaseY()
+{
+    return this->BaseY;
+}
+
+
+
+
+
+
 
 
 
