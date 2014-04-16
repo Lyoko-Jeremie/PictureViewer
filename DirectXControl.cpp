@@ -49,6 +49,8 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
     MainWindowRect( {0,0,0,0} ),
     MainWindowClientRect( {0,0,0,0} ),
     MainWindowBPP(0),
+    lpddsprimary(nullptr),
+    lpddsback(nullptr),
     BaseX(0),
     BaseY(0),
     PureColor(0)
@@ -360,14 +362,22 @@ bool DirectXControl::PrimaryShow()
     // 初始化结构体
     DDRAW_INIT_STRUCT(this->ddsd);
     // 设置有效项目
-    this->ddsd.dwFlags = DDSD_CAPS;
+    this->ddsd.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
+    // 设置后被缓冲数量
+    this->ddsd.dwBackBufferCount = 1;
     // 设置为主显示表面
-    this->ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+    this->ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_COMPLEX | DDSCAPS_FLIP;
     // 创建主显示表面
-    if (FAILED( this->lpdd7->CreateSurface(&ddsd, &lpddsprimary, NULL)))
+    if (FAILED( this->lpdd7->CreateSurface(&ddsd, &lpddsprimary, nullptr)))
     {
-//        throw runtime_error("DirectXControl():CreateSurface()fail");
-        lpddsprimary = NULL;
+        lpddsprimary = nullptr;
+        return false;
+    }
+    // 创建后备显示表面
+    ddsd.ddsCaps.dwCaps = DDSCAPS_BACKBUFFER;
+    if (FAILED( this->lpddsprimary->GetAttachedSurface( &ddsd.ddsCaps, &lpddsback)))
+    {
+        lpddsback = nullptr;
         return false;
     }
     return true;
@@ -375,12 +385,18 @@ bool DirectXControl::PrimaryShow()
 
 bool DirectXControl::PrimaryHide()
 {
+    // 后备表面
+    if (lpddsback)
+    {
+        lpddsback->Release();
+        lpddsback = nullptr;
+    }
     // 主显示表面
     if (lpddsprimary)
-        {
+    {
         lpddsprimary->Release();
-        lpddsprimary = NULL;
-        }
+        lpddsprimary = nullptr;
+    }
     return true;
 }
 
@@ -427,7 +443,7 @@ bool DirectXControl::PaintImage(
         return false;
     }
 
-    if ( lpddsprimary )     // 表面指针有效
+    if ( lpddsback )     // 表面指针有效
     {
         // 获取区域
         RECT client = this->GetMainWindowClientRect();
@@ -440,7 +456,7 @@ bool DirectXControl::PaintImage(
 
         // 加锁表面
         if ( SUCCEEDED(
-                        this->lpddsprimary->Lock(
+                        this->lpddsback->Lock(
                                                 NULL,&(this->ddsd),
                                                 DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,
                                                 NULL
@@ -461,7 +477,7 @@ bool DirectXControl::PaintImage(
             if ( 32 == this->GetPixelFormat() )
             {
                 // 获取表面指针
-                DWORD *primary_buffer = (DWORD *)ddsd.lpSurface;
+                DWORD *back_buffer = (DWORD *)ddsd.lpSurface;
                 // 32位绘图
 
 
@@ -470,6 +486,17 @@ bool DirectXControl::PaintImage(
 
                 unsigned int ImageHeight = Height;
                 unsigned int ImageWide = Wide;
+
+                // 清空表面
+
+                for ( unsigned int y = 0; UserHeight > y; ++y)
+                {
+                    for ( unsigned int x = 0; UserWide > x; ++x)
+                    {
+                        back_buffer[ x + y*lPitch32 ] = this->PureColor;
+                    }
+                }
+
 
 
                 if ( this->BaseX >= 0 && this->BaseY >= 0 )
@@ -491,7 +518,7 @@ bool DirectXControl::PaintImage(
                                 unsigned int ImageBit = Xi * Channels;
                                 if ( 3 == Channels )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         0,
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
@@ -500,7 +527,7 @@ bool DirectXControl::PaintImage(
                                 }
                                 if ( 4 == Channels && 0 != pImage[ImageBit] )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
                                                                                                         pImage[ImageBit+2],
@@ -530,7 +557,7 @@ bool DirectXControl::PaintImage(
                                 unsigned int ImageBit = Xi * Channels;
                                 if ( 3 == Channels )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         0,
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
@@ -539,7 +566,7 @@ bool DirectXControl::PaintImage(
                                 }
                                 if ( 4 == Channels && 0 != pImage[ImageBit] )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
                                                                                                         pImage[ImageBit+2],
@@ -569,7 +596,7 @@ bool DirectXControl::PaintImage(
                                 unsigned int ImageBit = Xi * Channels;
                                 if ( 3 == Channels )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         0,
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
@@ -578,7 +605,7 @@ bool DirectXControl::PaintImage(
                                 }
                                 if ( 4 == Channels && 0 != pImage[ImageBit] )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
                                                                                                         pImage[ImageBit+2],
@@ -608,7 +635,7 @@ bool DirectXControl::PaintImage(
                                 unsigned int ImageBit = Xi * Channels;
                                 if ( 3 == Channels )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         0,
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
@@ -617,7 +644,7 @@ bool DirectXControl::PaintImage(
                                 }
                                 if ( 4 == Channels && 0 != pImage[ImageBit] )
                                 {
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
                                                                                                         pImage[ImageBit+2],
@@ -636,10 +663,14 @@ bool DirectXControl::PaintImage(
             clog << "Now Unlock" << endl;
 
             // 解锁表面
-            if ( FAILED( this->lpddsprimary->Unlock(NULL)))
+            if ( FAILED( this->lpddsback->Unlock(NULL)))
                 throw runtime_error("Cant Unlock primary");
 
             clog << "Unlock!" << endl;
+
+            // 交换
+            while ( FAILED( this->lpddsprimary->Flip( nullptr, DDFLIP_WAIT ) ) )
+                /*Empty*/;
 
         }else
         {
@@ -662,7 +693,7 @@ bool DirectXControl::PaintImage(
 bool DirectXControl::ClearScreen()
 {
 
-    if ( lpddsprimary )     // 表面指针有效
+    if ( lpddsback )     // 表面指针有效
     {
         // 获取区域
         RECT client = this->GetMainWindowClientRect();
@@ -673,65 +704,74 @@ bool DirectXControl::ClearScreen()
 
         clog << "Now Lock" << endl;
 
-        // 加锁表面
-        if ( SUCCEEDED(
-                       this->lpddsprimary->Lock(
-                                                NULL,&(this->ddsd),
-                                                DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,
-                                                NULL
-                                                )
-                        )
-            )
+        // 随机色
+        this->PureColor = _RGB32BIT( rand()%255, rand()%255, rand()%255, rand()%255);
+
+
+        // 两个表面都要清空
+        for ( int h = 0; 2 != h; ++h)
         {
-            // 成功加锁
-            clog << "Lock!" << endl;
-
-
-            clog << "ddsd.lPitch " << ddsd.lPitch << endl;
-
-            // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
-            LONG lPitch32 = ddsd.lPitch >> 2;
-
-            // 32位保护
-            if ( 32 == this->GetPixelFormat() )
+            // 加锁表面
+            if ( SUCCEEDED(
+                           this->lpddsback->Lock(
+                                                    NULL,&(this->ddsd),
+                                                    DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,
+                                                    NULL
+                                                    )
+                            )
+                )
             {
-                // 获取表面指针
-                DWORD *primary_buffer = (DWORD *)ddsd.lpSurface;
-                // 32位绘图
+                // 成功加锁
+                clog << "Lock!" << endl;
 
-                // 全屏
-                unsigned int yLimit = static_cast<unsigned int>(client.bottom);
-                unsigned int xLimit = static_cast<unsigned int>(client.right);
 
-                // 随机色
-                this->PureColor = _RGB32BIT( rand()%255, rand()%255, rand()%255, rand()%255);
+                clog << "ddsd.lPitch " << ddsd.lPitch << endl;
 
-                for ( unsigned int y = 0; yLimit != y; ++y)
+                // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
+                LONG lPitch32 = ddsd.lPitch >> 2;
+
+                // 32位保护
+                if ( 32 == this->GetPixelFormat() )
                 {
-                    for ( unsigned int x = 0; xLimit != x; ++x)
+                    // 获取表面指针
+                    DWORD *back_buffer = (DWORD *)ddsd.lpSurface;
+                    // 32位绘图
+
+                    // 全屏
+                    unsigned int yLimit = static_cast<unsigned int>(client.bottom);
+                    unsigned int xLimit = static_cast<unsigned int>(client.right);
+
+
+                    for ( unsigned int y = 0; yLimit != y; ++y)
                     {
-                        primary_buffer[ x + y*lPitch32 ] = PureColor;
+                        for ( unsigned int x = 0; xLimit != x; ++x)
+                        {
+                            back_buffer[ x + y*lPitch32 ] = PureColor;
+                        }
                     }
-                }
 
 
 
-            }   // End of 32位保护
+                }   // End of 32位保护
 
-            clog << "Now Unlock" << endl;
+                clog << "Now Unlock" << endl;
 
-            // 解锁表面
-            if ( FAILED( this->lpddsprimary->Unlock(NULL)))
-                throw runtime_error("Cant Unlock primary");
+                // 解锁表面
+                if ( FAILED( this->lpddsback->Unlock(NULL)))
+                    throw runtime_error("Cant Unlock primary");
 
-            clog << "Unlock!" << endl;
+                clog << "Unlock!" << endl;
 
-        }else
-        {
-            // 加锁失败
-            clog << "Lock Fail" << endl;
-//            throw runtime_error("Cant Lock primary");
-            return false;
+                // 交换
+                while ( FAILED( this->lpddsprimary->Flip( nullptr, DDFLIP_WAIT ) ) )
+                    /*Empty*/;
+
+            }else{
+                // 加锁失败
+                clog << "Lock Fail" << endl;
+    //            throw runtime_error("Cant Lock primary");
+                return false;
+            }
         }
     }else{
         clog << "Lock Fail" << endl;
@@ -770,6 +810,11 @@ bool DirectXControl::ReBase()
 
 
 
+bool DirectXControl::ChangeBackGroudColor()
+{
+    this->PureColor = _RGB32BIT( rand()%255, rand()%255, rand()%255, rand()%255);
+    return true;
+}
 
 
 

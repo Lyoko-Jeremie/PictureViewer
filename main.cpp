@@ -34,16 +34,13 @@ char szClassName[ ] = "PictureViewer";
 string gsAboutString = "\
 \n\
 About:\n\
-Program : Jeremie\n\
+Designer : Jeremie\n\
+Programmer : Jeremie\n\
 Power By : Win32API DirectDraw libpng zlib\n\
-Thanks to my maids.\n\
+Thanks my maids.\n\
 \n\
                                                 CC-BY-SA 3.0\n\
 \n\
-\n\
-\n\
-\n\
-The lib Copyright :\n\
 ";
 
 // 帮助信息
@@ -57,6 +54,7 @@ Down to Move Down\n\
 Left to Move Left\n\
 Right to Move Right\n\
 Hone to ReSet Move\n\
+Delete to Change Backgroud Color\n\
 \n\
 Esc to End.\n\
 \n\
@@ -324,11 +322,11 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             // x= static_cast<int> LOWORD(lParam)
             // y= static_cast<int> HIWORD(lParam)
             // 按键= static_cast<int> LOWORD(wParam)
-            if ( (static_cast<int> HIWORD(lParam) < 20) && ( !gbMenuIsShow ) ) // 暂时不检测窗口
+            if ( (static_cast<int> HIWORD(lParam) < 50) && ( !gbMenuIsShow ) ) // 暂时不检测窗口
             {
                 gbMenuIsShow = SetMenu( hwnd, ghMenuHandle);
             }
-            if ( (static_cast<int> HIWORD(lParam) > 20) && ( gbMenuIsShow ) )
+            if ( (static_cast<int> HIWORD(lParam) > 50) && ( gbMenuIsShow ) )
             {
                 gbMenuIsShow = !SetMenu( hwnd, nullptr);
             }
@@ -344,6 +342,16 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             {
                 // Page Up
                 PictrueLast();
+            }
+            if ( KEYDOWN( VK_HOME ) )
+            {
+                gpDxc->ReBase();
+                // Home
+            }
+            if ( KEYDOWN( VK_DELETE ) )
+            {
+                gpDxc->ChangeBackGroudColor();
+                // Home
             }
             // 按键按下
             break;
@@ -435,12 +443,14 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     break;
 
                 case MENU_DEMO_ID_RAND_COLOER_RECT:
+                    gpDxc->ClearScreen();
                     ClosePngFile();
                     giShowType = 0;
                     giDemoType = 1;
                     break;
 
                 case MENU_DEMO_ID_RAND_COLOER_LINE:
+                    gpDxc->ClearScreen();
                     ClosePngFile();
                     giShowType = 0;
                     giDemoType = 2;
@@ -467,6 +477,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
 
                     ClosePngFile();
+                    gpDxc->PrimaryReFlash();
                     giShowType = 2;
 
                     break;
@@ -584,39 +595,25 @@ bool ReDrawing()
         return 0;
     }
 
-    bool tMove = false;
     if ( KEYDOWN( VK_LEFT ) )
     {
         gpDxc->AddBaseX( - 5 );
-        tMove = true;
         // 左箭头
     }
     if ( KEYDOWN( VK_RIGHT ) )
     {
         gpDxc->AddBaseX( 5 );
-        tMove = true;
         // 右箭头
     }
     if ( KEYDOWN( VK_UP ) )
     {
         gpDxc->AddBaseY( -5 );
-        tMove = true;
         // 上箭头
     }
     if ( KEYDOWN( VK_DOWN ) )
     {
         gpDxc->AddBaseY( 5 );
-        tMove = true;
         // 下箭头
-    }
-    if ( KEYDOWN( VK_HOME ) )
-    {
-        gpDxc->ReBase();
-        // Home
-    }
-    if ( tMove )
-    {
-        gpDxc->ClearScreen();
     }
 
     DrawObject( giShowType, gpImageDate, giDemoType);
@@ -804,8 +801,11 @@ bool DrawAbout()
         GetClientRect( gHwnd, &rect);
 
         // 绘制
+        rect.left += 20;
+        rect.right += 20;
         string AboutString = gsHelpString
                                         + gsAboutString
+                                        + "\n\nThe lib Copyright :\n"
                                         + "\n\n" + gpPngCDate->PngLibCopyright()
                                         + "\n\n" + gpPngCDate->PngZLibCopyright()
                                         ;

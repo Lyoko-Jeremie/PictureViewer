@@ -45,6 +45,7 @@ class DirectXControl
         bool AddBaseX( int i);
         bool AddBaseY( int i);
         bool ReBase();
+        bool ChangeBackGroudColor();
 
 
     protected:
@@ -70,6 +71,8 @@ class DirectXControl
         int MainWindowBPP;
         // 绘制表面
         LPDIRECTDRAWSURFACE7 lpddsprimary;
+        // 后备表面
+        LPDIRECTDRAWSURFACE7 lpddsback;
         // 图像基偏移
         int BaseX;
         int BaseY;
