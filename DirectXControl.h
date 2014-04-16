@@ -74,6 +74,8 @@ class DirectXControl
         int BaseX;
         int BaseY;
 
+        DWORD PureColor;
+
 //        // …Ë÷√øÌ∏ﬂ
 //        DWORD dwWidth;
 //        DWORD dwHeight;

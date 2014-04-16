@@ -25,9 +25,42 @@ bool initial();
 bool Shutdown();
 bool OpenIndexPngFile( unsigned int Index);
 bool ClosePngFile();
+bool DrawAbout();
 
 /*  将类名保存在全局变量中  */
 char szClassName[ ] = "PictureViewer";
+
+// 关于信息
+string gsAboutString = "\
+\n\
+About:\n\
+Program : Jeremie\n\
+Power By : Win32API DirectDraw libpng zlib\n\
+Thanks to my maids.\n\
+\n\
+                                                CC-BY-SA 3.0\n\
+\n\
+\n\
+\n\
+\n\
+The lib Copyright :\n\
+";
+
+// 帮助信息
+string gsHelpString = "\
+\n\
+Help Inform :\n\
+PageUp to Last Picture\n\
+PageDown to Next Picture\n\
+Up to Move Up\n\
+Down to Move Down\n\
+Left to Move Left\n\
+Right to Move Right\n\
+Hone to ReSet Move\n\
+\n\
+Esc to End.\n\
+\n\
+";
 
 // 控制结构指针
 DirectXControl *gpDxc = nullptr;
@@ -667,6 +700,7 @@ bool DrawObject( int object, pIMAGE pImage /*= nullptr*/, int demo /*= 0*/)
     }
     if ( 2 == object )
     {
+        DrawAbout();
         // 关于 等信息
         return true;
     }
@@ -756,6 +790,41 @@ bool ClosePngFile()
     gpDxc->ReBase();
     return true;
 }
+
+
+bool DrawAbout()
+{
+    HDC gdc = nullptr;
+    if ( nullptr != ( gdc = GetDC(gHwnd) ) )
+    {
+        // 有效
+
+        // 获取用户区矩形
+        RECT rect;
+        GetClientRect( gHwnd, &rect);
+
+        // 绘制
+        string AboutString = gsHelpString
+                                        + gsAboutString
+                                        + "\n\n" + gpPngCDate->PngLibCopyright()
+                                        + "\n\n" + gpPngCDate->PngZLibCopyright()
+                                        ;
+        DrawText( gdc, AboutString.c_str(), AboutString.size(), &rect, DT_LEFT);
+
+        // 释放
+        ReleaseDC( gHwnd, gdc);
+
+        // 使有效
+        ValidateRect( gHwnd, &rect);
+        return true;
+    }
+    clog << "DrawAboutFail." << endl;
+    return false;
+}
+
+
+
+
 
 
 

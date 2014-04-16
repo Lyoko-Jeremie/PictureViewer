@@ -50,7 +50,8 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
     MainWindowClientRect( {0,0,0,0} ),
     MainWindowBPP(0),
     BaseX(0),
-    BaseY(0)
+    BaseY(0),
+    PureColor(0)
 {
     // 初始化结构体
     DDRAW_INIT_STRUCT(this->ddsd);
@@ -470,32 +471,7 @@ bool DirectXControl::PaintImage(
                 unsigned int ImageHeight = Height;
                 unsigned int ImageWide = Wide;
 
-//                if ( this->BaseX == 0 && this->BaseY == 0 )       // 坍缩到下一个if中
-//                {   // 0 0
-//                    for ( unsigned int y = 0; UserHeight != y; ++y)
-//                    {
-//                        UCHAR *pImage = nullptr;
-//                        if ( ImageHeight > y )
-//                        {
-//                            // 未越界
-//                            pImage = ppImage[y];
-//                        }
-//                        for ( unsigned int x = 0; UserWide != x; ++x)
-//                        {
-//                            if ( ImageWide > x && pImage != nullptr )
-//                            {
-//                                // 未越界
-//                                unsigned int ImageBit = x *3;
-//                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
-//                                                                                                                        0,
-//                                                                                                                        pImage[ImageBit],
-//                                                                                                                        pImage[ImageBit+1],
-//                                                                                                                        pImage[ImageBit+2]
-//                                                                                                                        );
-//                            }
-//                        }
-//                    }
-//                }
+
                 if ( this->BaseX >= 0 && this->BaseY >= 0 )
                 {   // 右下移动
                     unsigned int Yi = 0;
@@ -512,13 +488,25 @@ bool DirectXControl::PaintImage(
                         {
                             if ( ImageWide > Xi && pImage != nullptr )
                             {
-                                unsigned int ImageBit = Xi *3;
-                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
-                                                                                                                        0,
-                                                                                                                        pImage[ImageBit],
-                                                                                                                        pImage[ImageBit+1],
-                                                                                                                        pImage[ImageBit+2]
-                                                                                                                        );
+                                unsigned int ImageBit = Xi * Channels;
+                                if ( 3 == Channels )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        0,
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2]
+                                                                                                        );
+                                }
+                                if ( 4 == Channels && 0 != pImage[ImageBit] )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2],
+                                                                                                        pImage[ImageBit+3]
+                                                                                                        );
+                                }
                             }
                         }
                     }
@@ -539,13 +527,25 @@ bool DirectXControl::PaintImage(
                         {
                             if ( ImageWide > Xi && pImage != nullptr )
                             {
-                                unsigned int ImageBit = Xi *3;
-                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
-                                                                                                                        0,
-                                                                                                                        pImage[ImageBit],
-                                                                                                                        pImage[ImageBit+1],
-                                                                                                                        pImage[ImageBit+2]
-                                                                                                                        );
+                                unsigned int ImageBit = Xi * Channels;
+                                if ( 3 == Channels )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        0,
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2]
+                                                                                                        );
+                                }
+                                if ( 4 == Channels && 0 != pImage[ImageBit] )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2],
+                                                                                                        pImage[ImageBit+3]
+                                                                                                        );
+                                }
                             }
                         }
                     }
@@ -566,13 +566,25 @@ bool DirectXControl::PaintImage(
                         {
                             if ( ImageWide > Xi && pImage != nullptr )
                             {
-                                unsigned int ImageBit = Xi *3;
-                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
-                                                                                                                        0,
-                                                                                                                        pImage[ImageBit],
-                                                                                                                        pImage[ImageBit+1],
-                                                                                                                        pImage[ImageBit+2]
-                                                                                                                        );
+                                unsigned int ImageBit = Xi * Channels;
+                                if ( 3 == Channels )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        0,
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2]
+                                                                                                        );
+                                }
+                                if ( 4 == Channels && 0 != pImage[ImageBit] )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2],
+                                                                                                        pImage[ImageBit+3]
+                                                                                                        );
+                                }
                             }
                         }
                     }
@@ -593,13 +605,25 @@ bool DirectXControl::PaintImage(
                         {
                             if ( ImageWide > Xi && pImage != nullptr )
                             {
-                                unsigned int ImageBit = Xi *3;
-                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
-                                                                                                                        0,
-                                                                                                                        pImage[ImageBit],
-                                                                                                                        pImage[ImageBit+1],
-                                                                                                                        pImage[ImageBit+2]
-                                                                                                                        );
+                                unsigned int ImageBit = Xi * Channels;
+                                if ( 3 == Channels )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        0,
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2]
+                                                                                                        );
+                                }
+                                if ( 4 == Channels && 0 != pImage[ImageBit] )
+                                {
+                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                        pImage[ImageBit],
+                                                                                                        pImage[ImageBit+1],
+                                                                                                        pImage[ImageBit+2],
+                                                                                                        pImage[ImageBit+3]
+                                                                                                        );
+                                }
                             }
                         }
                     }
@@ -680,7 +704,7 @@ bool DirectXControl::ClearScreen()
                 unsigned int xLimit = static_cast<unsigned int>(client.right);
 
                 // 随机色
-                DWORD PureColor = _RGB32BIT( 0, rand()%255, rand()%255, rand()%255);
+                this->PureColor = _RGB32BIT( rand()%255, rand()%255, rand()%255, rand()%255);
 
                 for ( unsigned int y = 0; yLimit != y; ++y)
                 {

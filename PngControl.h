@@ -60,6 +60,19 @@ class PngControl
         // 4 (RGB_ALPHA or RGB + filler byte)
         PCUCHAR GetPngChannels();
 
+        const char *PngLibCopyright(){
+            return png_get_copyright( nullptr );
+        }
+
+        const char *PngZLibCopyright(){
+            return "\n\
+zlib version 1.2.8, April 28th, 2013\n\
+Copyright (C) 1995-2013 Jean-loup Gailly and Mark Adler\n\
+\
+";
+        }
+
+
     protected:
 
         bool PngLibCreate();
