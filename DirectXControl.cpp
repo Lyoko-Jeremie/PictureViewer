@@ -463,45 +463,149 @@ bool DirectXControl::PaintImage(
                 DWORD *primary_buffer = (DWORD *)ddsd.lpSurface;
                 // 32位绘图
 
-                // 偏移保护
-                if ( ( (static_cast<int>(Height) - this->BaseY) > 0 ) || ( (static_cast<int>(Wide) - this->BaseX) > 0) )
-                {
-                    // 选小
-                    unsigned int yLimit = ( static_cast<unsigned int>(client.bottom - client.top) > static_cast<unsigned int>(static_cast<int>(Height) - this->BaseY) ? static_cast<unsigned int>(static_cast<int>(Height) - this->BaseY) : static_cast<unsigned int>(client.bottom - client.top) );
-                    unsigned int xLimit = ( static_cast<unsigned int>(client.right - client.left) > static_cast<unsigned int>(static_cast<int>(Wide) - this->BaseX) ? static_cast<unsigned int>(static_cast<int>(Wide) - this->BaseX) : static_cast<unsigned int>(client.right - client.left) );
-                    clog << "BaseY:" << this->BaseY
-                            << "\tBaseX:" << this->BaseX << endl;
 
-                    for ( unsigned int y = 0; yLimit != y; ++y)
+                unsigned int UserHeight = static_cast<unsigned int>(client.bottom - client.top);
+                unsigned int UserWide = static_cast<unsigned int>(client.right - client.left);
+
+                unsigned int ImageHeight = Height;
+                unsigned int ImageWide = Wide;
+
+//                if ( this->BaseX == 0 && this->BaseY == 0 )       // 坍缩到下一个if中
+//                {   // 0 0
+//                    for ( unsigned int y = 0; UserHeight != y; ++y)
+//                    {
+//                        UCHAR *pImage = nullptr;
+//                        if ( ImageHeight > y )
+//                        {
+//                            // 未越界
+//                            pImage = ppImage[y];
+//                        }
+//                        for ( unsigned int x = 0; UserWide != x; ++x)
+//                        {
+//                            if ( ImageWide > x && pImage != nullptr )
+//                            {
+//                                // 未越界
+//                                unsigned int ImageBit = x *3;
+//                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+//                                                                                                                        0,
+//                                                                                                                        pImage[ImageBit],
+//                                                                                                                        pImage[ImageBit+1],
+//                                                                                                                        pImage[ImageBit+2]
+//                                                                                                                        );
+//                            }
+//                        }
+//                    }
+//                }
+                if ( this->BaseX >= 0 && this->BaseY >= 0 )
+                {   // 右下移动
+                    unsigned int Yi = 0;
+                    for ( unsigned int y = this->BaseY; UserHeight > y; ++y, ++Yi)
                     {
-                        unsigned int yImage = y - this->BaseY;
-                        if ( yImage > 0 )
+                        UCHAR *pImage = nullptr;
+                        if ( ImageHeight > Yi )
                         {
-                            UCHAR *pImage = ppImage[y];
-                            for ( unsigned int x = 0; xLimit != x; ++x)
+                            // 未越界
+                            pImage = ppImage[Yi];
+                        }
+                        unsigned int Xi = 0;
+                        for ( unsigned int x = this->BaseX; UserWide > x; ++x, ++Xi)
+                        {
+                            if ( ImageWide > Xi && pImage != nullptr )
                             {
-                                unsigned int xImage = x - this->BaseX;
-                                if ( xImage > 0 )
-                                {
-                                    unsigned int ImageBit = xImage *3;
-                                    primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
-                                                                                                                    0,
-                                                                                                                    pImage[ImageBit],
-                                                                                                                    pImage[ImageBit+1],
-                                                                                                                    pImage[ImageBit+2]
-                                                                                                                    );
-                                }
+                                unsigned int ImageBit = Xi *3;
+                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                                        0,
+                                                                                                                        pImage[ImageBit],
+                                                                                                                        pImage[ImageBit+1],
+                                                                                                                        pImage[ImageBit+2]
+                                                                                                                        );
                             }
                         }
                     }
-
-
-
-                }else{
-                    clog << "BaseProtect\n"
-                            << "(static_cast<int>(Height) - BaseY):" << (static_cast<int>(Height) - BaseY)
-                            << "\t(static_cast<int>(Height) - BaseY):" << (static_cast<int>(Height) - BaseY) << endl;
                 }
+                if ( this->BaseX < 0 && this->BaseY >= 0 )
+                {   // 左下移动
+                    unsigned int Yi = 0;
+                    for ( unsigned int y = this->BaseY; UserHeight > y; ++y, ++Yi)
+                    {
+                        UCHAR *pImage = nullptr;
+                        if ( ImageHeight > Yi )
+                        {
+                            // 未越界
+                            pImage = ppImage[Yi];
+                        }
+                        unsigned int Xi = - this->BaseX;
+                        for ( unsigned int x = 0; UserWide > x; ++x, ++Xi)
+                        {
+                            if ( ImageWide > Xi && pImage != nullptr )
+                            {
+                                unsigned int ImageBit = Xi *3;
+                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                                        0,
+                                                                                                                        pImage[ImageBit],
+                                                                                                                        pImage[ImageBit+1],
+                                                                                                                        pImage[ImageBit+2]
+                                                                                                                        );
+                            }
+                        }
+                    }
+                }
+                if ( this->BaseX >= 0 && this->BaseY < 0 )
+                {   // 右上移动
+                    unsigned int Yi = - this->BaseY;
+                    for ( unsigned int y = 0; UserHeight > y; ++y, ++Yi)
+                    {
+                        UCHAR *pImage = nullptr;
+                        if ( ImageHeight > Yi )
+                        {
+                            // 未越界
+                            pImage = ppImage[Yi];
+                        }
+                        unsigned int Xi = 0;
+                        for ( unsigned int x = this->BaseX; UserWide > x; ++x, ++Xi)
+                        {
+                            if ( ImageWide > Xi && pImage != nullptr )
+                            {
+                                unsigned int ImageBit = Xi *3;
+                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                                        0,
+                                                                                                                        pImage[ImageBit],
+                                                                                                                        pImage[ImageBit+1],
+                                                                                                                        pImage[ImageBit+2]
+                                                                                                                        );
+                            }
+                        }
+                    }
+                }
+                if ( this->BaseX < 0 && this->BaseY < 0 )
+                {   // 左上移动
+                    unsigned int Yi = - this->BaseY;
+                    for ( unsigned int y = 0; UserHeight > y; ++y, ++Yi)
+                    {
+                        UCHAR *pImage = nullptr;
+                        if ( ImageHeight > Yi )
+                        {
+                            // 未越界
+                            pImage = ppImage[Yi];
+                        }
+                        unsigned int Xi = -  this->BaseX;
+                        for ( unsigned int x =0; UserWide > x; ++x, ++Xi)
+                        {
+                            if ( ImageWide > Xi && pImage != nullptr )
+                            {
+                                unsigned int ImageBit = Xi *3;
+                                primary_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+                                                                                                                        0,
+                                                                                                                        pImage[ImageBit],
+                                                                                                                        pImage[ImageBit+1],
+                                                                                                                        pImage[ImageBit+2]
+                                                                                                                        );
+                            }
+                        }
+                    }
+                }
+
+
 
             }   // End of 32位保护
 
@@ -618,28 +722,24 @@ bool DirectXControl::ClearScreen()
 
 
 
-bool DirectXControl::SetBaseX(int i)
+bool DirectXControl::AddBaseX(int i)
 {
-    clog << "SetBaseX" << endl;
-    this->BaseX = i;
+    clog << "AddBaseY" << i << endl;
+    this->BaseX += i;
     return true;
 }
-
-int DirectXControl::GetBaseX()
+bool DirectXControl::AddBaseY(int i)
 {
-    return this->BaseX;
-}
-
-bool DirectXControl::SetBaseY(int i)
-{
-    clog << "SetBaseY" << endl;
-    this->BaseY = i;
+    clog << "AddBaseY" << i << endl;
+    this->BaseY += i;
     return true;
 }
-
-int DirectXControl::GetBaseY()
+bool DirectXControl::ReBase()
 {
-    return this->BaseY;
+    clog << "ReBase" << endl;
+    this->BaseX = 0;
+    this->BaseY = 0;
+    return true;
 }
 
 

@@ -42,10 +42,9 @@ class DirectXControl
 
         bool PrimaryReFlash();
 
-        bool SetBaseX( int i);
-        int GetBaseX();
-        bool SetBaseY( int i);
-        int GetBaseY();
+        bool AddBaseX( int i);
+        bool AddBaseY( int i);
+        bool ReBase();
 
 
     protected:

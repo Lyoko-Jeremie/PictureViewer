@@ -244,6 +244,10 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     // 程序结束会自动析构dxc局部对象
     gpFileListDate = nullptr;
 
+    gpImageDate = nullptr;
+
+    gpPngCDate = nullptr;
+
 
     // 程序返回值，返回PostQuitMessage()函数的参数
     return messages.wParam;
@@ -297,10 +301,19 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             }
             break;
 
-//        case WM_KEYDOWN:
-//            // 这里不处理，真麻烦
-//            // 按键按下
-//            break;
+        case WM_KEYDOWN:
+            if ( KEYDOWN( VK_NEXT ) )
+            {
+                // Page Down
+                PictrueNext();
+            }
+            if ( KEYDOWN( VK_PRIOR ) )
+            {
+                // Page Up
+                PictrueLast();
+            }
+            // 按键按下
+            break;
 
         case WM_SIZE:
             // 大小改变
@@ -369,11 +382,11 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                 // 解析具体的菜单消息
                 switch ( LOWORD( wParam ) )
                 {
-                case MENU_FILE_ID_OPEN:
-                    break;
-
-                case MENU_FILE_ID_CLOSE:
-                    break;
+//                case MENU_FILE_ID_OPEN:
+//                    break;
+//
+//                case MENU_FILE_ID_CLOSE:
+//                    break;
 
                 case MENU_FILE_ID_EXIT:
                     // 发送退出消息
@@ -389,9 +402,15 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     break;
 
                 case MENU_DEMO_ID_RAND_COLOER_RECT:
+                    ClosePngFile();
+                    giShowType = 0;
+                    giDemoType = 1;
                     break;
 
                 case MENU_DEMO_ID_RAND_COLOER_LINE:
+                    ClosePngFile();
+                    giShowType = 0;
+                    giDemoType = 2;
                     break;
 
                 case MENU_HELP_ID_ABOUT:
@@ -412,6 +431,10 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     //
                     // Also, the PNG logo (in PNG format, of course) is supplied in the
                     // files "pngbar.png" and "pngbar.jpg (88x31) and "pngnow.png" (98x31).
+
+
+                    ClosePngFile();
+                    giShowType = 2;
 
                     break;
 
@@ -520,27 +543,49 @@ void PictrueNext()
 // 重绘
 bool ReDrawing()
 {
-    // for now test if user is hitting ESC and send WM_CLOSE
-    if (KEYDOWN(VK_ESCAPE))
-    {
-        PostMessage(gHwnd,WM_CLOSE,0,0);
-    } // end if
+
     if ( KEYDOWN( VK_ESCAPE ) )
     {
         // 发送退出消息
         PostMessage( gHwnd, WM_DESTROY, 0, 0);
         return 0;
     }
-    if ( KEYDOWN( VK_NEXT ) )
+
+    bool tMove = false;
+    if ( KEYDOWN( VK_LEFT ) )
     {
-        // Page Down
-        PictrueNext();
+        gpDxc->AddBaseX( - 5 );
+        tMove = true;
+        // 左箭头
     }
-    if ( KEYDOWN( VK_PRIOR ) )
+    if ( KEYDOWN( VK_RIGHT ) )
     {
-        // Page Up
-        PictrueLast();
+        gpDxc->AddBaseX( 5 );
+        tMove = true;
+        // 右箭头
     }
+    if ( KEYDOWN( VK_UP ) )
+    {
+        gpDxc->AddBaseY( -5 );
+        tMove = true;
+        // 上箭头
+    }
+    if ( KEYDOWN( VK_DOWN ) )
+    {
+        gpDxc->AddBaseY( 5 );
+        tMove = true;
+        // 下箭头
+    }
+    if ( KEYDOWN( VK_HOME ) )
+    {
+        gpDxc->ReBase();
+        // Home
+    }
+    if ( tMove )
+    {
+        gpDxc->ClearScreen();
+    }
+
     DrawObject( giShowType, gpImageDate, giDemoType);
     return true;
 }
@@ -608,32 +653,6 @@ bool DrawObject( int object, pIMAGE pImage /*= nullptr*/, int demo /*= 0*/)
     }
     if ( 1 == object )
     {
-        if ( KEYDOWN( VK_LEFT ) )
-        {
-            gpDxc->SetBaseX( gpDxc->GetBaseX() - 5 );
-            // 左箭头
-        }
-        if ( KEYDOWN( VK_RIGHT ) )
-        {
-            gpDxc->SetBaseX( gpDxc->GetBaseX() + 5 );
-            // 右箭头
-        }
-        if ( KEYDOWN( VK_UP ) )
-        {
-            gpDxc->SetBaseY( gpDxc->GetBaseY() - 5 );
-            // 上箭头
-        }
-        if ( KEYDOWN( VK_DOWN ) )
-        {
-            gpDxc->SetBaseY( gpDxc->GetBaseY() + 5 );
-            // 下箭头
-        }
-        if ( VK_HOME )
-        {
-            gpDxc->SetBaseX( 0 );
-            gpDxc->SetBaseY( 0 );
-            // Home
-        }
         // 附着到对象
         IMAGE &atImageDate = *gpImageDate;
         gpDxc->PaintImage(
@@ -648,6 +667,7 @@ bool DrawObject( int object, pIMAGE pImage /*= nullptr*/, int demo /*= 0*/)
     }
     if ( 2 == object )
     {
+        // 关于 等信息
         return true;
     }
     return true;
@@ -693,10 +713,10 @@ bool OpenIndexPngFile( unsigned int Index)
                     // 全不为0
                     // UCHAR 的 height * width * channels(RGB=3 , ARGB = 4) * bit_depth(24bit=8)
                     clog << "OpenIndexPngFile:PngAreOpen" << endl;
-                    clog << "\nWidth: " << atImageDate.Width
-                            << "\tBitDepth: " << atImageDate.BitDepth
-                            << "\tColorType: " << atImageDate.ColorType
-                            << "\tChannels: " << atImageDate.Channels << endl;
+                    clog << "\nWidth: " << static_cast<unsigned int>(atImageDate.Width)
+                            << "\tBitDepth: " << static_cast<unsigned int>(atImageDate.BitDepth)
+                            << "\tColorType: " << static_cast<unsigned int>(atImageDate.ColorType)
+                            << "\tChannels: " << static_cast<unsigned int>(atImageDate.Channels) << endl;
                     giShowType = 1;
                 }else{
                     // 恢复结构体
@@ -706,8 +726,7 @@ bool OpenIndexPngFile( unsigned int Index)
                     atImageDate.ColorType = 0;
                     atImageDate.Channels = 0;
                     atImageDate.ppImage = nullptr;
-                    gpDxc->SetBaseX( 0 );
-                    gpDxc->SetBaseY( 0 );
+                    gpDxc->ReBase();
                 }
 
             }
@@ -734,8 +753,7 @@ bool ClosePngFile()
     atImageDate.ColorType = 0;
     atImageDate.Channels = 0;
     atImageDate.ppImage = nullptr;
-    gpDxc->SetBaseX( 0 );
-    gpDxc->SetBaseY( 0 );
+    gpDxc->ReBase();
     return true;
 }
 
