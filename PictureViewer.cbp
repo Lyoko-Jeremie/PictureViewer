@@ -45,9 +45,10 @@
 		</Linker>
 		<Unit filename="DirectXControl.cpp" />
 		<Unit filename="DirectXControl.h" />
+		<Unit filename="FileList.cpp" />
+		<Unit filename="FileList.h" />
 		<Unit filename="PngControl.cpp" />
 		<Unit filename="PngControl.h" />
-		<Unit filename="PngLibControl.cpp" />
 		<Unit filename="RC.RC">
 			<Option compilerVar="WINDRES" />
 		</Unit>
