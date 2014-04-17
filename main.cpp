@@ -73,7 +73,7 @@ size_t gsFileIndex = 0;
 // 当前显示内容
 int giShowType = 0;
 // Demo内容
-int giDemoType = 0;
+int giDemoType = 1;
 
 
 // 菜单句柄
@@ -219,7 +219,6 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     {
         clog << "No Png File." << endl;
         giShowType = 0;
-//        return -1;
     }
     gpFileListDate = &FileListDate;
 
@@ -498,6 +497,12 @@ void PictrueLast()
     // 清屏
     gpDxc->ClearScreen();
     // 打开
+    if ( !gpFileListDate->GetSize() )
+    {
+        // 没有文件
+        giShowType = 0;
+        return;
+    }
     size_t index = ( 0 != gsFileIndex ? gsFileIndex - 1 : gpFileListDate->GetSize() - 1 );
     if ( OpenIndexPngFile( index ) )
     {
@@ -509,46 +514,6 @@ void PictrueLast()
     }
 
     ReDrawing();
-/*  Test
-//    // 测试像素位数【结果为32】
-//    clog << gpDxc->GetPixelFormat() << endl;
-//    {
-//        RECT a = gpDxc->GetMainWindowClientRect();
-//        clog << "left " << a.left << endl;
-//        clog << "right " << a.right << endl;
-//        clog << "top " << a.top << endl;
-//        clog << "bottom " << a.bottom << endl;
-//    }
-//    {   // Test
-//        RECT MainWindowRect;
-//        RECT MainWindowClientRect;
-//        GetWindowRect( gHwnd, &(MainWindowRect) );
-//        AdjustWindowRect(
-//            &(MainWindowClientRect),
-//            GetWindowStyle(gHwnd),
-//            GetMenu(gHwnd) != nullptr
-//            );
-//        cout << endl;
-//        cout << "left\t" << MainWindowRect.left << endl;
-//        cout << "right\t" << MainWindowRect.right << endl;
-//        cout << "top\t" << MainWindowRect.top << endl;
-//        cout << "bottom\t" << MainWindowRect.bottom << endl;
-//        cout << endl;
-//        cout << "left\t" << MainWindowClientRect.left << endl;          // -3
-//        cout << "right\t" << MainWindowClientRect.right << endl;         // 3
-//        cout << "top\t" << MainWindowClientRect.top << endl;           // -44 -25
-//        cout << "bottom\t" << MainWindowClientRect.bottom << endl;    // 3
-//        cout << endl;
-//        cout << endl;
-//
-////        真实窗口用户区矩形为：
-////        RL - CRL
-////        RR - CRR
-////        RT - CRT
-////        RB - CRB
-//
-//    }
-*/
     return;
 }
 
@@ -560,6 +525,12 @@ void PictrueNext()
     // 清屏
     gpDxc->ClearScreen();
     // 打开
+    if ( !gpFileListDate->GetSize() )
+    {
+        // 没有文件
+        giShowType = 0;
+        return;
+    }
     size_t index = ( gpFileListDate->GetSize() - 1 != gsFileIndex ? gsFileIndex + 1 : 0 );
     if ( OpenIndexPngFile( index ) )
     {
@@ -578,33 +549,34 @@ void PictrueNext()
 // 重绘
 bool ReDrawing()
 {
-
     if ( KEYDOWN( VK_ESCAPE ) )
     {
         // 发送退出消息
         PostMessage( gHwnd, WM_DESTROY, 0, 0);
         return 0;
     }
-
-    if ( KEYDOWN( VK_LEFT ) )
+    if ( 1 == giShowType )
     {
-        gpDxc->AddBaseX( - 5 );
-        // 左箭头
-    }
-    if ( KEYDOWN( VK_RIGHT ) )
-    {
-        gpDxc->AddBaseX( 5 );
-        // 右箭头
-    }
-    if ( KEYDOWN( VK_UP ) )
-    {
-        gpDxc->AddBaseY( -5 );
-        // 上箭头
-    }
-    if ( KEYDOWN( VK_DOWN ) )
-    {
-        gpDxc->AddBaseY( 5 );
-        // 下箭头
+        if ( KEYDOWN( VK_LEFT ) )
+        {
+            gpDxc->AddBaseX( - 5 );
+            // 左箭头
+        }
+        if ( KEYDOWN( VK_RIGHT ) )
+        {
+            gpDxc->AddBaseX( 5 );
+            // 右箭头
+        }
+        if ( KEYDOWN( VK_UP ) )
+        {
+            gpDxc->AddBaseY( -5 );
+            // 上箭头
+        }
+        if ( KEYDOWN( VK_DOWN ) )
+        {
+            gpDxc->AddBaseY( 5 );
+            // 下箭头
+        }
     }
 
     DrawObject( giShowType, gpImageDate, giDemoType);
@@ -637,13 +609,18 @@ bool initial()
         {
             // 成功打开，显示图片
             giShowType = 1;
+            clog << "OpenIndexPngFileSeccess" << endl;
         }
         else
         {
             // 打开失败，显示Demo
             giShowType = 0;
+            clog << "OpenIndexPngFileFail" << endl;
         }
 
+    }else{
+        clog << "No Png File." << endl;
+        giShowType = 0;
     }
 
     return true;
@@ -755,6 +732,7 @@ bool OpenIndexPngFile( unsigned int Index)
         }else{
             clog << "OpenIndexPngFile:PngAreOpenFail" << endl;
             gpPngCDate->ReStartPngLib();
+            return false;
         }
 
     return true;

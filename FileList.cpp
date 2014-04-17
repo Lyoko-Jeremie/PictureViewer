@@ -22,7 +22,7 @@ FileList::FileList( string path ):
 
 FileList::~FileList()
 {
-    // Empty
+    this->AllReady = false;
 }
 
 bool FileList::ReFlash()
@@ -35,8 +35,10 @@ string FileList::GetFileOnlyName(const unsigned int i)
 {
     if ( i < this->GetSize() )
     {
+        clog << "PngListSize: " << this->GetSize() << endl;
         return this->MainFileList.at(i);
     }
+    clog << "PngListSize: " << this->GetSize() << " < " << i << endl;
     throw out_of_range("FileList:GetFileOnlyName:OutOfRange: " + i );
     return "";
 }
@@ -59,6 +61,7 @@ bool FileList::CtorList()
     {
         clog << "FileList:ReFlash:ReadHandle:INVALID_HANDLE_VALUE{MayBeNotFindOrPathWrong}" << endl;
         this->pReadStruct = nullptr;
+        this->AllReady = false;
         return false;
     }
     do{
@@ -82,6 +85,7 @@ bool FileList::CtorList()
         return false;
     }
     this->ReadHandle = nullptr;
+    this->AllReady = true;
     return true;
 }
 

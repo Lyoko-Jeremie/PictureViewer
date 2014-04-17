@@ -1,37 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="FileList.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="352" topLine="9" />
-		</Cursor>
-	</File>
-	<File name="FileList.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1760" topLine="64" />
-		</Cursor>
-		<Folding>
-			<Collapse line="34" />
-			<Collapse line="36" />
-			<Collapse line="44" />
-		</Folding>
-	</File>
-	<File name="RC.RC" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="21" topLine="0" />
-		</Cursor>
-		<Folding>
-			<Collapse line="7" />
-		</Folding>
-	</File>
 	<File name="RC.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="60" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="14889" topLine="463" />
 		</Cursor>
 	</File>
 	<File name="PngControl.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -42,39 +14,101 @@
 			<Collapse line="62" />
 		</Folding>
 	</File>
-	<File name="DirectXControl.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="27196" topLine="694" />
+			<Cursor1 position="17041" topLine="140" />
 		</Cursor>
-	</File>
-	<File name="DirectXControl.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1372" topLine="25" />
-		</Cursor>
+		<Folding>
+			<Collapse line="92" />
+			<Collapse line="117" />
+			<Collapse line="121" />
+			<Collapse line="130" />
+			<Collapse line="218" />
+			<Collapse line="232" />
+			<Collapse line="259" />
+			<Collapse line="261" />
+			<Collapse line="295" />
+			<Collapse line="308" />
+			<Collapse line="326" />
+			<Collapse line="330" />
+			<Collapse line="337" />
+			<Collapse line="342" />
+			<Collapse line="347" />
+			<Collapse line="352" />
+			<Collapse line="357" />
+			<Collapse line="382" />
+			<Collapse line="385" />
+			<Collapse line="387" />
+			<Collapse line="393" />
+			<Collapse line="397" />
+			<Collapse line="402" />
+			<Collapse line="408" />
+			<Collapse line="412" />
+			<Collapse line="414" />
+			<Collapse line="433" />
+			<Collapse line="494" />
+			<Collapse line="502" />
+			<Collapse line="506" />
+			<Collapse line="511" />
+			<Collapse line="556" />
+			<Collapse line="564" />
+			<Collapse line="568" />
+			<Collapse line="581" />
+			<Collapse line="587" />
+			<Collapse line="592" />
+			<Collapse line="597" />
+			<Collapse line="602" />
+			<Collapse line="614" />
+			<Collapse line="651" />
+			<Collapse line="661" />
+			<Collapse line="663" />
+			<Collapse line="668" />
+			<Collapse line="673" />
+			<Collapse line="687" />
+			<Collapse line="698" />
+			<Collapse line="702" />
+			<Collapse line="705" />
+			<Collapse line="731" />
+			<Collapse line="762" />
+			<Collapse line="781" />
+			<Collapse line="784" />
+		</Folding>
 	</File>
 	<File name="PngControl.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2309" topLine="72" />
+			<Cursor1 position="6504" topLine="56" />
 		</Cursor>
 		<Folding>
-			<Collapse line="25" />
-			<Collapse line="27" />
-			<Collapse line="45" />
-			<Collapse line="48" />
-			<Collapse line="57" />
-			<Collapse line="87" />
-			<Collapse line="155" />
-			<Collapse line="160" />
-			<Collapse line="178" />
-			<Collapse line="189" />
-			<Collapse line="198" />
-			<Collapse line="233" />
-			<Collapse line="242" />
-			<Collapse line="263" />
-			<Collapse line="273" />
-			<Collapse line="283" />
-			<Collapse line="293" />
-			<Collapse line="303" />
+			<Collapse line="68" />
+			<Collapse line="74" />
+			<Collapse line="79" />
+			<Collapse line="95" />
+			<Collapse line="110" />
+			<Collapse line="139" />
+			<Collapse line="141" />
+			<Collapse line="168" />
+			<Collapse line="215" />
 		</Folding>
+	</File>
+	<File name="DirectXControl.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1372" topLine="4" />
+		</Cursor>
+		<Folding>
+			<Collapse line="18" />
+		</Folding>
+	</File>
+	<File name="RC.RC" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="21" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="7" />
+		</Folding>
+	</File>
+	<File name="DirectXControl.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4570" topLine="645" />
+		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
