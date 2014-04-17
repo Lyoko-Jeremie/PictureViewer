@@ -299,20 +299,8 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case WM_DESTROY:
             // 销毁 窗口关闭按钮按下
             // 在这里清除一切
-            gpDxc->PrimaryHide();
+            gpDxc->PrimaryHide();   // 停止显示
             PostQuitMessage (0);    // 发送 WM_QUIT 消息退出整个程序
-            break;
-
-        case WM_PAINT:
-            // 重绘
-            {
-//                PAINTSTRUCT ps;
-                // 激活窗口 并用背景画刷重绘整个窗口
-                // hdc 为图形环境句柄
-//                HDC hdc = BeginPaint( hwnd, &ps);
-                // 重绘代码
-//                EndPaint( hwnd, &ps);
-            }
             break;
 
         // 鼠标消息
@@ -322,11 +310,13 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             // x= static_cast<int> LOWORD(lParam)
             // y= static_cast<int> HIWORD(lParam)
             // 按键= static_cast<int> LOWORD(wParam)
-            if ( (static_cast<int> HIWORD(lParam) < 50) && ( !gbMenuIsShow ) ) // 暂时不检测窗口
+            if ( (static_cast<int> HIWORD(lParam) < 20) && ( !gbMenuIsShow ) ) // 暂时不检测窗口
             {
+                // 清空图像
+                gpDxc->PrimaryReFlash();
                 gbMenuIsShow = SetMenu( hwnd, ghMenuHandle);
             }
-            if ( (static_cast<int> HIWORD(lParam) > 50) && ( gbMenuIsShow ) )
+            if ( (static_cast<int> HIWORD(lParam) > 20) && ( gbMenuIsShow ) )
             {
                 gbMenuIsShow = !SetMenu( hwnd, nullptr);
             }
@@ -369,60 +359,8 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             // 重新获取表面指针
 //            clog << "WM_SIZE:PrimaryReFlash() " << endl;
 //            clog << gpDxc->PrimaryReFlash() << endl;
-            // Windows消息你他妈就是在逗我...你个逗比.FuckYouMother!1
+            // Windows消息你他妈就是在逗我...你个逗比.FuckMicrosoft!
 
-            break;
-
-        case WM_MOVE:
-            // 窗口移动
-            // TODO 响应move 并且在用户区绘图
-            break;
-
-//        case WM_ACTIVATE:     // 不再处理活动状态了
-            {   // 窗口活动状态改变
-                /**< P:谁被激活了    reinterpret_cast<HWND> lParam  Note:底层转换必须要这样做  */
-                if ( gHwnd == reinterpret_cast<HWND> (lParam) )
-                {   // 是主窗口
-                    if ( WA_INACTIVE==LOWORD(wParam) )
-                    {
-//                        clog << "WM_ACTIVATE:PrimaryHide()" << endl;
-//                        gpDxc->PrimaryHide();
-                        /**< 取消激活 */
-                        /**< 测试最小化 */
-                        if ( static_cast<bool> ( HIWORD(wParam) ) )
-                        {
-                            /**< 最小化了 */
-                        }
-                        else
-                        {
-                            /**< 只是失去焦点 */
-                        }
-                    }
-                    else
-                    {
-//                        clog << "WM_ACTIVATE:PrimaryShow()" << endl;
-//                        gpDxc->PrimaryShow();
-                        /**< 被激活 */
-                        /**< 测试激活方式 */
-                        if ( WA_ACTIVE==LOWORD(wParam))
-                        {
-                            /**< 非鼠标激活 */
-                        }
-                        else
-                        {
-                            if (WA_CLICKACTIVE==LOWORD(wParam))
-                            {
-                                /**< 由鼠标激活 */
-                            }
-                        }
-                    }
-                }
-            }
-            break;
-
-
-        case WM_CREATE:
-            // 窗口创建
             break;
 
         case WM_COMMAND:
@@ -551,6 +489,7 @@ bool ReDrawing()
 {
     if ( KEYDOWN( VK_ESCAPE ) )
     {
+        gpDxc->PrimaryHide();   // 停止显示
         // 发送退出消息
         PostMessage( gHwnd, WM_DESTROY, 0, 0);
         return 0;
@@ -579,7 +518,11 @@ bool ReDrawing()
         }
     }
 
-    DrawObject( giShowType, gpImageDate, giDemoType);
+    if ( GetMenu( gHwnd ) == nullptr )
+    {
+        // 没有菜单才绘图
+        DrawObject( giShowType, gpImageDate, giDemoType);
+    }
     return true;
 }
 
