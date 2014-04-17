@@ -95,6 +95,7 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
             throw runtime_error("DirectXControl():SetCooperativeLevel()fail");
         }
     }
+    this->ChangeBackGroudColor();
     this->AllReady = true;
 }
 

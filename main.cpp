@@ -704,8 +704,6 @@ bool OpenIndexPngFile( unsigned int Index)
                     &&
                     atImageDate.Height
                     &&
-                    atImageDate.Height
-                    &&
                     atImageDate.Width
                     )
                 {
