@@ -46,18 +46,15 @@ Thanks my maids.\n\
 // 帮助信息
 string gsHelpString = "\
 \n\
-Help Inform :\n\
-PageUp to Last Picture\n\
-PageDown to Next Picture\n\
-Up to Move Up\n\
-Down to Move Down\n\
-Left to Move Left\n\
-Right to Move Right\n\
-Hone to ReSet Move\n\
-Delete to Change Backgroud Color\n\
+帮助 :\n\
+上一张图 PageUp / 向上滚动\n\
+下一张图 PageDown / 向下滚动\n\
+移动 上下左右 / 左键拖动\n\
+重置位置 Home / 左键双击\n\
+改变背景颜色 Delete / 右键单击\n\
 \n\
-Esc to Exit\n\
-End to Help.\n\
+退出 Esc\n\
+帮助 End\n\
 \n\
 ";
 
