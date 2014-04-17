@@ -1,0 +1,95 @@
+# depslib dependency file v1.0
+1397673662 source:h:\github\pictureviewer\main.cpp
+	<windows.h>
+	<windowsx.h>
+	<string>
+	<iostream>
+	<stdexcept>
+	"RC.h"
+	"DirectXControl.h"
+	"FileList.h"
+	"PngControl.h"
+
+1397142209 source:h:\github\pictureviewer\mainmenu.rc
+	"MainMenu.h"
+
+1397142235 h:\github\pictureviewer\mainmenu.h
+
+1397673871 source:h:\github\pictureviewer\directxcontrol.cpp
+	"DirectXControl.h"
+	<stdexcept>
+	<iostream>
+	<windows.h>
+	<windowsx.h>
+	<ddraw.h>
+
+1397672931 h:\github\pictureviewer\directxcontrol.h
+	<windows.h>
+	<ddraw.h>
+
+1003197090 d:\dxsdk\include\ddraw.h
+	<objbase.h>
+
+1397593963 source:h:\github\pictureviewer\rc.rc
+	"RC.h"
+
+1397593968 h:\github\pictureviewer\rc.h
+
+1397404382 source:h:\github\pictureviewer\bitmapfileobject.cpp
+	"BitmapFileObject.h"
+
+1397405871 h:\github\pictureviewer\bitmapfileobject.h
+	<windows.h>
+
+1394130901 h:\github\pictureviewer\lpng1610\png.h
+	"pnglibconf.h"
+	"pngconf.h"
+
+1394130903 h:\github\pictureviewer\lpng1610\pnglibconf.h
+
+1394130901 h:\github\pictureviewer\lpng1610\pngconf.h
+	<limits.h>
+	<stddef.h>
+	<stdio.h>
+	<setjmp.h>
+	<time.h>
+
+1397460577 source:h:\github\pictureviewer\imagecontrol.cpp
+	"ImageControl.h"
+	<png.h>
+
+1397460574 h:\github\pictureviewer\imagecontrol.h
+	<png.h>
+
+1397585404 source:h:\github\pictureviewer\pngcontrol.cpp
+	"PngControl.h"
+	<iostream>
+	<cstdio>
+	<png.h>
+
+1397667756 h:\github\pictureviewer\pngcontrol.h
+	<iostream>
+	<cstdio>
+	<string>
+	<png.h>
+
+1397496929 source:h:\github\pictureviewer\pnglibcontrol.cpp
+	<iostream>
+	<cstdio>
+	<png.h>
+
+1397581385 source:h:\github\pictureviewer\filelist.cpp
+	"FileList.h"
+	<string>
+	<vector>
+	<iostream>
+	<stdexcept>
+	<windows.h>
+	<winbase.h>
+
+1397579137 h:\github\pictureviewer\filelist.h
+	<string>
+	<vector>
+	<windows.h>
+	<winbase.h>
+
