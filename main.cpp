@@ -72,8 +72,14 @@ size_t gsFileIndex = 0;
 
 // 当前显示内容
 int giShowType = 0;
-// Demo内容
+// Demo内容   初始值 1
 int giDemoType = 1;
+
+
+// 鼠标拖动用参数
+bool gbMouseLeftButtonDown = false;
+int giMouseX = 0;
+int giMouseY = 0;
 
 
 // 菜单句柄
@@ -310,16 +316,72 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             // x= static_cast<int> LOWORD(lParam)
             // y= static_cast<int> HIWORD(lParam)
             // 按键= static_cast<int> LOWORD(wParam)
-            if ( (static_cast<int> HIWORD(lParam) < 20) && ( !gbMenuIsShow ) ) // 暂时不检测窗口
-            {
-                // 清空图像
-                gpDxc->PrimaryReFlash();
-                gbMenuIsShow = SetMenu( hwnd, ghMenuHandle);
+            if ( gbMouseLeftButtonDown )
+            {   // 按下   跟踪
+                int NewMouseX = static_cast<int> LOWORD(lParam);
+                int NewMouseY = static_cast<int> HIWORD(lParam);
+                // 计算位移
+                gpDxc->AddBaseX( NewMouseX - giMouseX );
+                gpDxc->AddBaseY( NewMouseY - giMouseY );
+                // 刷新
+                giMouseX = NewMouseX;
+                giMouseY = NewMouseY;
             }
-            if ( (static_cast<int> HIWORD(lParam) > 20) && ( gbMenuIsShow ) )
+            else
             {
-                gbMenuIsShow = !SetMenu( hwnd, nullptr);
+                if ( (static_cast<int> HIWORD(lParam) < 20) && ( !gbMenuIsShow ) ) // 暂时不检测窗口
+                {
+                    // 清空图像
+                    gpDxc->PrimaryReFlash();
+                    gbMenuIsShow = SetMenu( hwnd, ghMenuHandle);
+                }
+                if ( (static_cast<int> HIWORD(lParam) > 20) && ( gbMenuIsShow ) )
+                {
+                    gbMenuIsShow = !SetMenu( hwnd, nullptr);
+                }
             }
+            break;
+
+        case WM_LBUTTONDOWN:
+            // 开始跟踪
+            gbMouseLeftButtonDown = true;
+            // x= static_cast<int> LOWORD(lParam)
+            // y= static_cast<int> HIWORD(lParam)
+            giMouseX = static_cast<int> LOWORD(lParam);
+            giMouseY = static_cast<int> HIWORD(lParam);
+            // 左键按下
+            break;
+
+        case WM_LBUTTONUP:
+            // 跟踪结束
+            gbMouseLeftButtonDown = false;
+            giMouseX = 0;
+            giMouseY = 0;
+            // 左键弹起
+            break;
+
+        case WM_LBUTTONDBLCLK:
+            gpDxc->ReBase();
+            // 左键双击消息
+            break;
+
+        case WM_RBUTTONDOWN:
+            gpDxc->ChangeBackGroudColor();
+            // 右键消息
+            break;
+
+        case WM_MOUSEWHEEL :
+            // HIWORD(wParam) == WHEEL_DELTA的倍数 && 正为上
+//            clog << "WM_MOUSEWHEEL " << static_cast<short>( HIWORD(wParam) ) << endl;
+            if ( HIWORD(wParam) > 0 )
+            {
+                PictrueLast();
+            }
+            if ( HIWORD(wParam) < 0 )
+            {
+                PictrueNext();
+            }
+            // 滚轮事件
             break;
 
         case WM_KEYDOWN:
