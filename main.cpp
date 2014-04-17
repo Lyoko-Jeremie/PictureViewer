@@ -56,7 +56,8 @@ Right to Move Right\n\
 Hone to ReSet Move\n\
 Delete to Change Backgroud Color\n\
 \n\
-Esc to End.\n\
+Esc to Exit\n\
+End to Help.\n\
 \n\
 ";
 
@@ -353,6 +354,14 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                 gpDxc->ChangeBackGroudColor();
                 // Home
             }
+            if ( KEYDOWN( VK_END ) )
+            {
+                // 和关于的菜单项一致
+                ClosePngFile();
+                gpDxc->PrimaryReFlash();
+                giShowType = 2;
+                // End
+            }
             // 按键按下
             break;
 
@@ -457,24 +466,6 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     break;
 
                 case MENU_HELP_ID_ABOUT:
-//                    MessageBox(
-//                               hwnd,
-//                               "Picture Viewer\n\n\nDesign by Jeremie\n\n\nPower by DirectX",
-//                               "About Picture Viewer",
-//                               MB_OK | MB_ICONEXCLAMATION
-//                               );
-                    // TODO 关于 的 绘图界面
-
-                    // png : png_get_copyright(NULL)
-
-                    // A "png_get_copyright" function is available, for convenient use in "about"
-                    // boxes and the like:
-                    //
-                    //     printf("%s", png_get_copyright(NULL));
-                    //
-                    // Also, the PNG logo (in PNG format, of course) is supplied in the
-                    // files "pngbar.png" and "pngbar.jpg (88x31) and "pngnow.png" (98x31).
-
 
                     ClosePngFile();
                     gpDxc->PrimaryReFlash();
