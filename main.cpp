@@ -454,7 +454,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             // 重新获取表面指针
 //            clogerr << "WM_SIZE:PrimaryReFlash() " << endl;
 //            clogerr << gpDxc->PrimaryReFlash() << endl;
-            // Windows消息你他妈就是在逗我...你个逗比.FuckMicrosoft!
+            // Windows消息你TM就是在逗我...你个逗比.FuckMicrosoft!
 
             break;
 
