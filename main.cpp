@@ -682,7 +682,20 @@ bool DrawObject( int object, pIMAGE pImage /*= nullptr*/, int demo /*= 0*/)
     }
     if ( 0 == object )
     {
+
+        #ifdef NDEBUG
+        static DWORD start_time;
+        #endif // NDEBUG
+
         gpDxc->TestPaint(demo);
+
+        #ifdef NDEBUG
+        while ( ( GetTickCount() - start_time ) < 11 )
+            Sleep(1);
+        // DWORD start_time = GetTickCount();
+        start_time = GetTickCount();
+        #endif // NDEBUG
+
         return true;
     }
     if ( 1 == object )
