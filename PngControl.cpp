@@ -1,9 +1,12 @@
 #include "PngControl.h"
 
-// 所用到的 clog 和 FILE
-#include <iostream>
+// 所用到的 clogerr 和 FILE
+//#include <iostream>
 #include <cstdio>
 using namespace std;
+// 测试用输出包装类
+#include "CLogErr.h"
+using namespace CLogErr::clog;
 
 // png 解码库
 #include <png.h>   // lpng1610
@@ -47,7 +50,7 @@ PngControl::PngControl( unsigned int MaxHeighty, unsigned int MaxWidthx ):
 
     if ( !this->PngLibCreate() )
     {
-        clog << "PngControl:ctor:PngLibCreateFailed" << endl;
+        clogerr << "PngControl:ctor:PngLibCreateFailed" << endl;
         AllReady = false;
         return;
     }
@@ -56,7 +59,7 @@ PngControl::PngControl( unsigned int MaxHeighty, unsigned int MaxWidthx ):
 
     if ( !this->SetMaxHW( MaxHeight, MaxWidth) )
     {
-        clog << "PngControl:ctor:SetMaxHWFailed" << endl;
+        clogerr << "PngControl:ctor:SetMaxHWFailed" << endl;
         AllReady = false;
         return;
     }
@@ -86,7 +89,7 @@ bool PngControl::OpenPngFile(string File)
 {
     if ( !AreInitiSccess() || AreOpenSccess() )
     {
-        clog << "PngControl:OpenPngFile:PremiseFailed"
+        clogerr << "PngControl:OpenPngFile:PremiseFailed"
                 << "\n!AreInitiSccess: " << !AreInitiSccess()
                 << "\tAreOpenSccess: " << AreOpenSccess() << endl;
         return false;
@@ -98,7 +101,7 @@ bool PngControl::OpenPngFile(string File)
 
         this->PngLibRelase();
 
-        clog << "PngControl:OpenPngFile:PnglibFail" << endl;
+        clogerr << "PngControl:OpenPngFile:PnglibFail" << endl;
 
         return false;
     }else{
@@ -111,7 +114,7 @@ bool PngControl::OpenPngFile(string File)
         {
             // 打开失败
             // png_destroy_read_struct(& this->png_ptr, & this->info_ptr, nullptr);
-            clog << "PngControl:OpenPngFile:FileOpenFail" << endl;
+            clogerr << "PngControl:OpenPngFile:FileOpenFail" << endl;
             return false;
         }
 
@@ -140,7 +143,7 @@ PCppUCHAR PngControl::GetPngPixelArray()
 {
     if ( !AreInitiSccess() || !AreOpenSccess() )
     {
-        clog << "PngControl:GetPngPixelArray:PremiseFailed" << endl;
+        clogerr << "PngControl:GetPngPixelArray:PremiseFailed" << endl;
         return nullptr;
     }
     // png_bytepp row_pointers = png_get_rows(png_ptr, info_ptr);
@@ -167,7 +170,7 @@ bool PngControl::ReStartPngLib(unsigned int MaxHeighty, unsigned int MaxWidthx)
 
 bool PngControl::ReStartPngLib()
 {
-    clog << "PngControl:ReStartPngLib" << endl;
+    clogerr << "PngControl:ReStartPngLib" << endl;
     this->PngLibRelase();
     return this->PngLibCreate();
 }
@@ -177,7 +180,7 @@ bool PngControl::PngLibCreate()
 {
     if ( AreInitiSccess() || AreOpenSccess() )
     {
-        clog << "PngControl:PngLibCreate:PremiseFailed" << endl;
+        clogerr << "PngControl:PngLibCreate:PremiseFailed" << endl;
         return false;
     }
 
@@ -188,7 +191,7 @@ bool PngControl::PngLibCreate()
 
     if ( png_ptr == nullptr )
     {
-        clog << "PngControl:PngLibCreate:CreateReadStructFail" << endl;
+        clogerr << "PngControl:PngLibCreate:CreateReadStructFail" << endl;
         return false;
     }
 
@@ -199,7 +202,7 @@ bool PngControl::PngLibCreate()
     {
 //        png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
         png_destroy_read_struct(& this->png_ptr, nullptr, nullptr);
-        clog << "PngControl:PngLibCreate:CreateInfoStructFail" << endl;
+        clogerr << "PngControl:PngLibCreate:CreateInfoStructFail" << endl;
         png_ptr = nullptr;
         return false;
     }
@@ -207,7 +210,7 @@ bool PngControl::PngLibCreate()
     AllReady = true;
     HalfReady = true;
 
-    clog << "PngControl:PngLibCreate:Create" << endl;
+    clogerr << "PngControl:PngLibCreate:Create" << endl;
 
     return true;
 }
@@ -215,7 +218,7 @@ bool PngControl::PngLibCreate()
 bool PngControl::PngLibRelase()
 {
 
-    clog << "PngControl:PngLibRelase:Relase" << endl;
+    clogerr << "PngControl:PngLibRelase:Relase" << endl;
 
     // 释放
     png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
@@ -232,7 +235,7 @@ bool PngControl::SetMaxHW( unsigned int MaxHeighty, unsigned int MaxWidthx )
 {
     if ( !this->HalfReady && !AreOpenSccess() )
     {
-        clog << "PngControl:SetMaxHW:PremiseFailed" << endl;
+        clogerr << "PngControl:SetMaxHW:PremiseFailed" << endl;
         return false;
     }
 
@@ -245,7 +248,7 @@ bool PngControl::SetMaxHW( unsigned int MaxHeighty, unsigned int MaxWidthx )
 
         this->PngLibRelase();
 
-        clog << "PngControl:SetMaxHW:PngSetUserLimits:PnglibFail" << endl;
+        clogerr << "PngControl:SetMaxHW:PngSetUserLimits:PnglibFail" << endl;
 
         return false;
     }else{
@@ -262,7 +265,7 @@ PCUINT PngControl::GetPngWidth()
 {
     if ( !AreInitiSccess() || !AreOpenSccess() )
     {
-        clog << "PngControl:GetPngWidth:PremiseFailed" << endl;
+        clogerr << "PngControl:GetPngWidth:PremiseFailed" << endl;
         return 0;
     }
     return png_get_image_width(png_ptr, info_ptr);
@@ -272,7 +275,7 @@ PCUINT PngControl::GetPngHeight()
 {
     if ( !AreInitiSccess() || !AreOpenSccess() )
     {
-        clog << "PngControl:GetPngHeight:PremiseFailed" << endl;
+        clogerr << "PngControl:GetPngHeight:PremiseFailed" << endl;
         return 0;
     }
     return png_get_image_height(png_ptr, info_ptr);
@@ -282,7 +285,7 @@ PCUCHAR PngControl::GetPngBitDepth()
 {
     if ( !AreInitiSccess() || !AreOpenSccess() )
     {
-        clog << "PngControl:GetPngBitDepth:PremiseFailed" << endl;
+        clogerr << "PngControl:GetPngBitDepth:PremiseFailed" << endl;
         return 0;
     }
     return png_get_bit_depth(png_ptr, info_ptr);
@@ -292,7 +295,7 @@ PCUCHAR PngControl::GetPngColorType()
 {
     if ( !AreInitiSccess() || !AreOpenSccess() )
     {
-        clog << "PngControl:GetPngColorType:PremiseFailed" << endl;
+        clogerr << "PngControl:GetPngColorType:PremiseFailed" << endl;
         return 0;
     }
     return png_get_color_type(png_ptr, info_ptr);
@@ -302,7 +305,7 @@ PCUCHAR PngControl::GetPngChannels()
 {
     if ( !AreInitiSccess() || !AreOpenSccess() )
     {
-        clog << "PngControl:GetPngChannels:PremiseFailed" << endl;
+        clogerr << "PngControl:GetPngChannels:PremiseFailed" << endl;
         return 0;
     }
     return png_get_channels(png_ptr, info_ptr);

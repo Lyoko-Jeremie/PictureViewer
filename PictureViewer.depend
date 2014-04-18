@@ -1,24 +1,24 @@
 # depslib dependency file v1.0
-1397802109 source:h:\github\pictureviewer\main.cpp
+1397818280 source:h:\github\pictureviewer\main.cpp
 	<windows.h>
 	<windowsx.h>
 	<string>
-	<iostream>
 	<stdexcept>
 	"RC.h"
 	"DirectXControl.h"
 	"FileList.h"
 	"PngControl.h"
+	"CLogErr.h"
 
 1397142209 source:h:\github\pictureviewer\mainmenu.rc
 	"MainMenu.h"
 
 1397142235 h:\github\pictureviewer\mainmenu.h
 
-1397730100 source:h:\github\pictureviewer\directxcontrol.cpp
+1397818276 source:h:\github\pictureviewer\directxcontrol.cpp
 	"DirectXControl.h"
 	<stdexcept>
-	<iostream>
+	"CLogErr.h"
 	<windows.h>
 	<windowsx.h>
 	<ddraw.h>
@@ -61,16 +61,16 @@
 1397460574 h:\github\pictureviewer\imagecontrol.h
 	<png.h>
 
-1397706878 source:h:\github\pictureviewer\pngcontrol.cpp
+1397818297 source:h:\github\pictureviewer\pngcontrol.cpp
 	"PngControl.h"
-	<iostream>
 	<cstdio>
+	"CLogErr.h"
 	<png.h>
 
-1397706878 h:\github\pictureviewer\pngcontrol.h
-	<iostream>
+1397818307 h:\github\pictureviewer\pngcontrol.h
 	<cstdio>
 	<string>
+	"CLogErr.h"
 	<png.h>
 
 1397496929 source:h:\github\pictureviewer\pnglibcontrol.cpp
@@ -78,12 +78,12 @@
 	<cstdio>
 	<png.h>
 
-1397728767 source:h:\github\pictureviewer\filelist.cpp
+1397818289 source:h:\github\pictureviewer\filelist.cpp
 	"FileList.h"
 	<string>
 	<vector>
-	<iostream>
 	<stdexcept>
+	"CLogErr.h"
 	<windows.h>
 	<winbase.h>
 
@@ -92,4 +92,10 @@
 	<vector>
 	<windows.h>
 	<winbase.h>
+
+1397809841 source:h:\github\pictureviewer\clogerr.cpp
+
+1397818491 h:\github\pictureviewer\clogerr.h
+	<iostream>
+	<string>
 

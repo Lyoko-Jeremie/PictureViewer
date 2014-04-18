@@ -3,7 +3,7 @@
 #include <windowsx.h>
 // C++String
 #include <string>
-#include <iostream>
+//#include <iostream>
 #include <stdexcept>
 using namespace std;
 // 菜单资源
@@ -14,6 +14,9 @@ using namespace std;
 #include "FileList.h"
 // Png解析库包装类
 #include "PngControl.h"
+// 测试用输出包装类
+#include "CLogErr.h"
+using namespace CLogErr::clog;
 
 /*  消息回调函数  */
 LRESULT CALLBACK WindowProcedure (HWND, UINT, WPARAM, LPARAM);
@@ -227,7 +230,8 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     // 检测是否创建成功
     if ( !dxc.AreInitiSccess() )
     {
-        clog << "DirectXControl Create Fail." << endl;
+        clogerr << "DirectXControl Create Fail.";
+        clogerr << endl;
         return -1;
     }
     // 指针指向
@@ -237,7 +241,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     FileList FileListDate(".\\png\\*.png");
     if ( !FileListDate.GetSize() )
     {
-        clog << "No Png File." << endl;
+        clogerr << "No Png File." << endl;
         giShowType = 0;
     }
     gpFileListDate = &FileListDate;
@@ -250,7 +254,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     PngControl PngCDate( 4000, 2000);   // 大约一般屏幕两倍大
     if ( !PngCDate.AreInitiSccess() )
     {
-        clog << "Png Lib Initial Fail." << endl;
+        clogerr << "Png Lib Initial Fail." << endl;
         return -1;
     }
     gpPngCDate = &PngCDate;
@@ -388,7 +392,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         case WM_MOUSEWHEEL :
             // HIWORD(wParam) == WHEEL_DELTA的倍数 && 正为上
-//            clog << "WM_MOUSEWHEEL " << static_cast<short>( HIWORD(wParam) ) << endl;
+//            clogerr << "WM_MOUSEWHEEL " << static_cast<short>( HIWORD(wParam) ) << endl;
             if ( HIWORD(wParam) > 0 )
             {
                 PictrueLast();
@@ -435,8 +439,8 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case WM_SIZE:
             // 大小改变
             // 重新获取表面指针
-//            clog << "WM_SIZE:PrimaryReFlash() " << endl;
-//            clog << gpDxc->PrimaryReFlash() << endl;
+//            clogerr << "WM_SIZE:PrimaryReFlash() " << endl;
+//            clogerr << gpDxc->PrimaryReFlash() << endl;
             // Windows消息你他妈就是在逗我...你个逗比.FuckMicrosoft!
 
             break;
@@ -630,17 +634,17 @@ bool initial()
         {
             // 成功打开，显示图片
             giShowType = 1;
-            clog << "OpenIndexPngFileSeccess" << endl;
+            clogerr << "OpenIndexPngFileSeccess" << endl;
         }
         else
         {
             // 打开失败，显示Demo
             giShowType = 0;
-            clog << "OpenIndexPngFileFail" << endl;
+            clogerr << "OpenIndexPngFileFail" << endl;
         }
 
     }else{
-        clog << "No Png File." << endl;
+        clogerr << "No Png File." << endl;
         giShowType = 0;
     }
 
@@ -730,8 +734,9 @@ bool OpenIndexPngFile( unsigned int Index)
                 {
                     // 全不为0
                     // UCHAR 的 height * width * channels(RGB=3 , ARGB = 4) * bit_depth(24bit=8)
-                    clog << "OpenIndexPngFile:PngAreOpen" << endl;
-                    clog << "\nWidth: " << static_cast<unsigned int>(atImageDate.Width)
+                    clogerr << "OpenIndexPngFile:PngAreOpen" << endl;
+                    clogerr << "\nWidth: "
+                            << static_cast<unsigned int>(atImageDate.Width)
                             << "\tBitDepth: " << static_cast<unsigned int>(atImageDate.BitDepth)
                             << "\tColorType: " << static_cast<unsigned int>(atImageDate.ColorType)
                             << "\tChannels: " << static_cast<unsigned int>(atImageDate.Channels) << endl;
@@ -749,7 +754,7 @@ bool OpenIndexPngFile( unsigned int Index)
 
             }
         }else{
-            clog << "OpenIndexPngFile:PngAreOpenFail" << endl;
+            clogerr << "OpenIndexPngFile:PngAreOpenFail" << endl;
             gpPngCDate->ReStartPngLib();
             return false;
         }
@@ -760,7 +765,7 @@ bool OpenIndexPngFile( unsigned int Index)
 
 bool ClosePngFile()
 {
-    clog << "ClosePngFile" << endl;
+    clogerr << "ClosePngFile" << endl;
     giShowType = -1;    // 不显示
     gpPngCDate->ReStartPngLib();
     // 附着到对象
@@ -806,7 +811,7 @@ bool DrawAbout()
         ValidateRect( gHwnd, &rect);
         return true;
     }
-    clog << "DrawAboutFail." << endl;
+    clogerr << "DrawAboutFail." << endl;
     return false;
 }
 
@@ -831,22 +836,22 @@ HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType)
         DWORD dwResourceSize = SizeofResource(hInstance, hResource);
         if (dwResourceSize>0)
         {
-            clog << "LoadResource" << endl;
+            clogerr << "LoadResource" << endl;
             HGLOBAL hRsrcGlobal = LoadResource(hInstance, hResource);
             if (hRsrcGlobal)
             {
-                clog << "LockResource" << endl;
+                clogerr << "LockResource" << endl;
                 LPBYTE pResource = (LPBYTE)LockResource(hRsrcGlobal);
                 if (pResource)
                 {
-                    clog << "CreateIconFromResource" << endl;
+                    clogerr << "CreateIconFromResource" << endl;
                     hCursor = (HCURSOR)CreateIconFromResource(pResource, dwResourceSize, FALSE, 0x00030000);
 //                    UnlockResource(pResource);        // 被无效了
                 }
                 FreeResource(hRsrcGlobal);
             }
         }else{
-        clog << "dwResourceSize !> 0" << endl;
+        clogerr << "dwResourceSize !> 0" << endl;
         }
     }
     return hCursor;

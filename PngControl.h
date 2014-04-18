@@ -1,11 +1,14 @@
 #ifndef PNGCONTROL_H
 #define PNGCONTROL_H
 
-// 所用到的 clog 和 FILE
-#include <iostream>
+// 所用到的 clogerr 和 FILE
+//#include <iostream>
 #include <cstdio>
 #include <string>
 using namespace std;
+// 测试用输出包装类
+#include "CLogErr.h"
+using namespace CLogErr::clog;
 
 // png 解码库
 #include <png.h>   // lpng1610

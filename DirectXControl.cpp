@@ -3,8 +3,11 @@
 #include "DirectXControl.h"
 // 标准异常处理类
 #include <stdexcept>
-#include <iostream>
+//#include <iostream>
 using namespace std;
+// 测试用输出包装类
+#include "CLogErr.h"
+using namespace CLogErr::clog;
 // Windows头文件
 #include <windows.h>
 #include <windowsx.h>
@@ -243,7 +246,7 @@ bool DirectXControl::TestPaint( int type, unsigned int runtimes )
         this->DDRAW_INIT_STRUCT(ddsd);
 
 
-        clog << "Now Lock" << endl;
+        clogerr << "Now Lock" << endl;
 
         // 加锁表面
         if ( SUCCEEDED(
@@ -256,10 +259,10 @@ bool DirectXControl::TestPaint( int type, unsigned int runtimes )
             )
         {
             // 成功加锁
-            clog << "Lock!" << endl;
+            clogerr << "Lock!" << endl;
 
 
-            clog << "ddsd.lPitch " << ddsd.lPitch << endl;
+            clogerr << "ddsd.lPitch " << ddsd.lPitch << endl;
 
             // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
             LONG lPitch32 = ddsd.lPitch >> 2;
@@ -277,8 +280,8 @@ bool DirectXControl::TestPaint( int type, unsigned int runtimes )
                     {
                         int x = rand() % (client.right - client.left -100) + client.left;
                         int y = rand() % (client.bottom - client.top -100) + client.top;
-                        clog << "x " << x << endl;
-                        clog << "y " << y << endl;
+                        clogerr << "x " << x << endl;
+                        clogerr << "y " << y << endl;
                         DWORD color = _RGB32BIT( 0, rand() %100+100, rand() %100+100, rand() %100+100);
                         for ( int i = 0; 100!=i; ++i)
                         {
@@ -319,23 +322,23 @@ bool DirectXControl::TestPaint( int type, unsigned int runtimes )
 
             }   // End of 32位保护
 
-            clog << "Now Unlock" << endl;
+            clogerr << "Now Unlock" << endl;
 
             // 解锁表面
             if ( FAILED( this->lpddsprimary->Unlock(NULL)))
                 throw runtime_error("Cant Unlock primary");
 
-            clog << "Unlock!" << endl;
+            clogerr << "Unlock!" << endl;
 
         }else
         {
             // 加锁失败
-            clog << "Lock Fail" << endl;
+            clogerr << "Lock Fail" << endl;
 //            throw runtime_error("Cant Lock primary");
             return false;
         }
     }else{
-        clog << "Lock Fail" << endl;
+        clogerr << "Lock Fail" << endl;
     }
 
 
@@ -438,7 +441,7 @@ bool DirectXControl::PaintImage(
     // Channels= 3 or 4     【3为24位  4为32位】
     if ( !(8 == BitDepth && ( 3 == Channels || 4 == Channels ) ) )
     {
-        clog << "DirectXControl:PaintImage:PremiseFailed"
+        clogerr << "DirectXControl:PaintImage:PremiseFailed"
                 << "\nBitDepth: " << static_cast<int>(BitDepth)
                 << "\tChannels: " << static_cast<int>(Channels) << endl;
         return false;
@@ -453,7 +456,7 @@ bool DirectXControl::PaintImage(
         this->DDRAW_INIT_STRUCT(ddsd);
 
 
-        clog << "Now Lock" << endl;
+        clogerr << "Now Lock" << endl;
 
         // 加锁表面
         if ( SUCCEEDED(
@@ -466,10 +469,10 @@ bool DirectXControl::PaintImage(
             )
         {
             // 成功加锁
-            clog << "Lock!" << endl;
+            clogerr << "Lock!" << endl;
 
 
-            clog << "ddsd.lPitch " << ddsd.lPitch << endl;
+            clogerr << "ddsd.lPitch " << ddsd.lPitch << endl;
 
             // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
             LONG lPitch32 = ddsd.lPitch >> 2;
@@ -661,13 +664,13 @@ bool DirectXControl::PaintImage(
 
             }   // End of 32位保护
 
-            clog << "Now Unlock" << endl;
+            clogerr << "Now Unlock" << endl;
 
             // 解锁表面
             if ( FAILED( this->lpddsback->Unlock(NULL)))
                 throw runtime_error("Cant Unlock primary");
 
-            clog << "Unlock!" << endl;
+            clogerr << "Unlock!" << endl;
 
             // 交换
             while ( FAILED( this->lpddsprimary->Flip( nullptr, DDFLIP_WAIT ) ) )
@@ -676,12 +679,12 @@ bool DirectXControl::PaintImage(
         }else
         {
             // 加锁失败
-            clog << "Lock Fail" << endl;
+            clogerr << "Lock Fail" << endl;
 //            throw runtime_error("Cant Lock primary");
             return false;
         }
     }else{
-        clog << "Lock Fail" << endl;
+        clogerr << "Lock Fail" << endl;
     }
 
 
@@ -703,7 +706,7 @@ bool DirectXControl::ClearScreen()
         this->DDRAW_INIT_STRUCT(ddsd);
 
 
-        clog << "Now Lock" << endl;
+        clogerr << "Now Lock" << endl;
 
         // 随机色
         this->PureColor = _RGB32BIT( rand()%255, rand()%255, rand()%255, rand()%255);
@@ -723,10 +726,10 @@ bool DirectXControl::ClearScreen()
                 )
             {
                 // 成功加锁
-                clog << "Lock!" << endl;
+                clogerr << "Lock!" << endl;
 
 
-                clog << "ddsd.lPitch " << ddsd.lPitch << endl;
+                clogerr << "ddsd.lPitch " << ddsd.lPitch << endl;
 
                 // ddsd.lPitch=3200 屏幕宽度800 所以32位下要除以4
                 LONG lPitch32 = ddsd.lPitch >> 2;
@@ -755,13 +758,13 @@ bool DirectXControl::ClearScreen()
 
                 }   // End of 32位保护
 
-                clog << "Now Unlock" << endl;
+                clogerr << "Now Unlock" << endl;
 
                 // 解锁表面
                 if ( FAILED( this->lpddsback->Unlock(NULL)))
                     throw runtime_error("Cant Unlock primary");
 
-                clog << "Unlock!" << endl;
+                clogerr << "Unlock!" << endl;
 
                 // 交换
                 while ( FAILED( this->lpddsprimary->Flip( nullptr, DDFLIP_WAIT ) ) )
@@ -769,13 +772,13 @@ bool DirectXControl::ClearScreen()
 
             }else{
                 // 加锁失败
-                clog << "Lock Fail" << endl;
+                clogerr << "Lock Fail" << endl;
     //            throw runtime_error("Cant Lock primary");
                 return false;
             }
         }
     }else{
-        clog << "Lock Fail" << endl;
+        clogerr << "Lock Fail" << endl;
     }
 
 
@@ -789,19 +792,19 @@ bool DirectXControl::ClearScreen()
 
 bool DirectXControl::AddBaseX(int i)
 {
-    clog << "AddBaseY" << i << endl;
+    clogerr << "AddBaseY" << i << endl;
     this->BaseX += i;
     return true;
 }
 bool DirectXControl::AddBaseY(int i)
 {
-    clog << "AddBaseY" << i << endl;
+    clogerr << "AddBaseY" << i << endl;
     this->BaseY += i;
     return true;
 }
 bool DirectXControl::ReBase()
 {
-    clog << "ReBase" << endl;
+    clogerr << "ReBase" << endl;
     this->BaseX = 0;
     this->BaseY = 0;
     return true;

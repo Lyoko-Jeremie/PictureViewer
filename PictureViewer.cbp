@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-DDEBUG" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -23,6 +24,7 @@
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
+					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -44,6 +46,8 @@
 			<Add library="lpng1610\libpng.a" />
 			<Add library="zlib128\libz.a" />
 		</Linker>
+		<Unit filename="CLogErr.cpp" />
+		<Unit filename="CLogErr.h" />
 		<Unit filename="DirectXControl.cpp" />
 		<Unit filename="DirectXControl.h" />
 		<Unit filename="FileList.cpp" />
