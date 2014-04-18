@@ -258,6 +258,11 @@ bool DirectXControl::TestPaint( int type, unsigned int runtimes )
                         )
             )
         {
+
+            #ifdef NDEBUG
+            static DWORD start_time;
+            #endif // NDEBUG
+
             // ³É¹¦¼ÓËø
             clogerr << "Lock!" << endl;
 
@@ -329,6 +334,13 @@ bool DirectXControl::TestPaint( int type, unsigned int runtimes )
                 throw runtime_error("Cant Unlock primary");
 
             clogerr << "Unlock!" << endl;
+
+            #ifdef NDEBUG
+            while ( ( GetTickCount() - start_time ) < 11 )
+                Sleep(1);
+            // DWORD start_time = GetTickCount();
+            start_time = GetTickCount();
+            #endif // NDEBUG
 
         }else
         {

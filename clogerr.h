@@ -2,8 +2,6 @@
 #define CLOGERR_H
 
 #include <iostream>
-#include <string>
-using std::string;
 using std::clog;
 
 namespace CLogErr{
@@ -15,7 +13,8 @@ class CLogErr
         CLogErr(){}
         virtual ~CLogErr(){}
         // 作为成员函数只能写一个参数，另一个是this
-        // 对象版
+
+        // 任意对象版
         template <typename T>
         inline CLogErr &operator<< ( const T &object )
         {
@@ -25,18 +24,19 @@ class CLogErr
             return *this;
         }
 
-        // 给 endl 和其他的函数指针版本
-        template <typename T>
-        inline CLogErr &operator<< ( T& (*fpObject)(T&))
-        {
-            #ifndef NDEBUG
-                clog << fpObject;
-            #endif
-            return *this;
-        }
+//        // 给 endl 和其他的函数指针版本
+//        template <typename T>
+//        inline CLogErr &operator<< ( T& (*fpObject)(T&))
+//        {
+//            #ifndef NDEBUG
+//                clog << fpObject;
+//            #endif
+//            return *this;
+//        }
 
         // from : http://stackoverflow.com/questions/1134388/stdendl-is-of-unknown-type-when-overloading-operator
 
+        // 模仿 std::endl 的本对象版
         // function that takes a custom stream, and returns it
         typedef CLogErr& (*MyStreamManipulator)(CLogErr&);
 
@@ -65,7 +65,7 @@ class CLogErr
             return stream;
         }
 
-
+        // std::cout endl 对本对象的操作
         // this is the type of std::cout
         typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
 

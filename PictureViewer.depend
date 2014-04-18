@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1397820388 source:h:\github\pictureviewer\main.cpp
+1397831555 source:h:\github\pictureviewer\main.cpp
 	<windows.h>
 	<windowsx.h>
 	<string>
@@ -95,7 +95,6 @@
 
 1397809841 source:h:\github\pictureviewer\clogerr.cpp
 
-1397818652 h:\github\pictureviewer\clogerr.h
+1397844080 h:\github\pictureviewer\clogerr.h
 	<iostream>
-	<string>
 
