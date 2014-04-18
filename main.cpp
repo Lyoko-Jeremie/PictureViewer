@@ -30,6 +30,7 @@ bool OpenIndexPngFile( unsigned int Index);
 bool ClosePngFile();
 bool DrawAbout();
 HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType);
+bool ExitAPPMessage();
 
 
 /*  将类名保存在全局变量中  */
@@ -58,7 +59,7 @@ string gsHelpString = "\
 重置位置 Home / 左键双击\n\
 改变背景颜色 Delete / 右键单击\n\
 \n\
-退出 Esc\n\
+退出 Esc / 左键+右键\n\
 帮助 End\n\
 \n\
 ";
@@ -288,9 +289,18 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
             TranslateMessage(&messages);
             DispatchMessage(&messages);
         }
+        #ifndef NDEBUG
         /**< CPU防满载延迟 */
         Sleep(30);
+        #else
+//        DWORD start_time = GetTickCount();
+        #endif // NDEBUG
         ReDrawing();
+
+        #ifdef NDEBUG
+//        while ( ( GetTickCount() - start_time ) < 33 )
+//            /*Enmpty*/;
+        #endif // NDEBUG
     }
 
     Shutdown();
@@ -322,9 +332,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         case WM_CLOSE:
         case WM_DESTROY:
             // 销毁 窗口关闭按钮按下
-            // 在这里清除一切
-            gpDxc->PrimaryHide();   // 停止显示
-            PostQuitMessage (0);    // 发送 WM_QUIT 消息退出整个程序
+            ExitAPPMessage();
             break;
 
         // 鼠标消息
@@ -387,17 +395,22 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         case WM_RBUTTONDOWN:
             gpDxc->ChangeBackGroudColor();
+            if ( true == gbMouseLeftButtonDown )
+            {
+                // 发退出指令
+                ExitAPPMessage();
+            }
             // 右键消息
             break;
 
         case WM_MOUSEWHEEL :
-            // HIWORD(wParam) == WHEEL_DELTA的倍数 && 正为上
+            // HIWORD(wParam) == WHEEL_DELTA的倍数 && 正为下
 //            clogerr << "WM_MOUSEWHEEL " << static_cast<short>( HIWORD(wParam) ) << endl;
-            if ( HIWORD(wParam) > 0 )
+            if ( HIWORD(wParam) < 0 )
             {
                 PictrueLast();
             }
-            if ( HIWORD(wParam) < 0 )
+            if ( HIWORD(wParam) > 0 )
             {
                 PictrueNext();
             }
@@ -571,9 +584,7 @@ bool ReDrawing()
 {
     if ( KEYDOWN( VK_ESCAPE ) )
     {
-        gpDxc->PrimaryHide();   // 停止显示
-        // 发送退出消息
-        PostMessage( gHwnd, WM_DESTROY, 0, 0);
+        ExitAPPMessage();
         return 0;
     }
     if ( 1 == giShowType )
@@ -825,6 +836,7 @@ bool DrawAbout()
 
 
 //HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType)
+// 加载 ani 动态光标用 工具函数
 HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType)
 {
     HCURSOR hCursor = NULL;
@@ -856,3 +868,15 @@ HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType)
     }
     return hCursor;
 }
+
+// 退出消息
+bool ExitAPPMessage()
+{
+    // 在这里清除一切
+    gpDxc->PrimaryHide();   // 停止显示
+    PostQuitMessage (0);    // 发送 WM_QUIT 消息退出整个程序
+    return true;
+}
+
+
+
