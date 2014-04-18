@@ -1,6 +1,6 @@
 #include "RC.h"
 
-
+CURSOR_ID_MOVE ANICURSOR Camera_Middle.ani
 
 MainMenu MENU
 {

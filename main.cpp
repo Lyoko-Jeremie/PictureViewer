@@ -26,6 +26,8 @@ bool Shutdown();
 bool OpenIndexPngFile( unsigned int Index);
 bool ClosePngFile();
 bool DrawAbout();
+HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType);
+
 
 /*  将类名保存在全局变量中  */
 char szClassName[ ] = "PictureViewer";
@@ -87,6 +89,10 @@ bool gbMenuIsShow = false;
 HWND gHwnd = nullptr;
 // 程序句柄
 HINSTANCE gHInstance = nullptr;
+
+// 鼠标资源
+HCURSOR ghCurosrMove = nullptr;
+HCURSOR ghCurosrArrow = nullptr;
 
 // 类型
 typedef unsigned long DWORD;
@@ -151,7 +157,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     /* 使用默认的icon和鼠标指针 */
     wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);       // 图标
     wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);     // 图标 小
-    wincl.hCursor = LoadCursor (NULL, IDC_ARROW);         // 鼠标指针
+    wincl.hCursor = nullptr;         // 鼠标指针
     wincl.lpszMenuName = NULL;   //"MainMenu";                 // C风格ASCII菜单资源名字符串
     // 下面两个是附加的运行时间消息，置0即可
     wincl.cbClsExtra = 0;
@@ -196,6 +202,17 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     }
 
     gHwnd = hwnd;
+
+    // 加载资源
+    // LoadAnimatedCursor(CURSOR_ID_MOVE, RT_ANICURSOR);
+    // RT_ANICURSOR 是资源加载类型
+    ghCurosrMove = LoadAnimatedCursor(CURSOR_ID_MOVE, RT_ANICURSOR);
+    // SetCursor(ghCurosrMove);     加载方法
+
+    // 加载默认鼠标   默认在nullptr中
+    ghCurosrArrow = LoadCursor( nullptr, IDC_ARROW);
+    // 默认鼠标
+    SetCursor(ghCurosrArrow);
 
     // 显示窗口
     //ShowWindow (hwnd, nCmdShow);
@@ -341,6 +358,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         case WM_LBUTTONDOWN:
             // 开始跟踪
+            SetCursor(ghCurosrMove);    // 设置鼠标
             gbMouseLeftButtonDown = true;
             // x= static_cast<int> LOWORD(lParam)
             // y= static_cast<int> HIWORD(lParam)
@@ -351,6 +369,7 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
         case WM_LBUTTONUP:
             // 跟踪结束
+            SetCursor(ghCurosrArrow);   // 恢复鼠标
             gbMouseLeftButtonDown = false;
             giMouseX = 0;
             giMouseY = 0;
@@ -796,4 +815,39 @@ bool DrawAbout()
 
 
 
+//HCURSOR hCursor = LoadAnimatedCursor(IDR_MYTYPE1, _T("MyType"));
+//HCURSOR hCursor = LoadAnimatedCursor(IDR_MYTYPE1, "MyType");
 
+
+//HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType)
+HCURSOR LoadAnimatedCursor(UINT nID, LPCTSTR pszResouceType)
+{
+    HCURSOR hCursor = NULL;
+//    HINSTANCE hInstance = AfxGetInstanceHandle();
+    HINSTANCE hInstance = gHInstance;
+    if (hInstance)
+    {
+        HRSRC hResource = FindResource(hInstance, MAKEINTRESOURCE(nID), pszResouceType );
+        DWORD dwResourceSize = SizeofResource(hInstance, hResource);
+        if (dwResourceSize>0)
+        {
+            clog << "LoadResource" << endl;
+            HGLOBAL hRsrcGlobal = LoadResource(hInstance, hResource);
+            if (hRsrcGlobal)
+            {
+                clog << "LockResource" << endl;
+                LPBYTE pResource = (LPBYTE)LockResource(hRsrcGlobal);
+                if (pResource)
+                {
+                    clog << "CreateIconFromResource" << endl;
+                    hCursor = (HCURSOR)CreateIconFromResource(pResource, dwResourceSize, FALSE, 0x00030000);
+//                    UnlockResource(pResource);        // 被无效了
+                }
+                FreeResource(hRsrcGlobal);
+            }
+        }else{
+        clog << "dwResourceSize !> 0" << endl;
+        }
+    }
+    return hCursor;
+}

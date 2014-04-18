@@ -16,5 +16,8 @@
 #define MENU_HELP_ID_ABOUT 50001
 
 
+#define CURSOR_ID_MOVE 1001
+
+
 
 #endif // MAINMENU_H_INCLUDED
