@@ -17,7 +17,7 @@ class CLogErr
         // 作为成员函数只能写一个参数，另一个是this
         // 对象版
         template <typename T>
-        CLogErr &operator<< ( const T &object )
+        inline CLogErr &operator<< ( const T &object )
         {
             #ifndef NDEBUG
                 clog << object;
@@ -27,7 +27,7 @@ class CLogErr
 
         // 给 endl 和其他的函数指针版本
         template <typename T>
-        CLogErr &operator<< ( T& (*fpObject)(T&))
+        inline CLogErr &operator<< ( T& (*fpObject)(T&))
         {
             #ifndef NDEBUG
                 clog << fpObject;
@@ -41,7 +41,7 @@ class CLogErr
         typedef CLogErr& (*MyStreamManipulator)(CLogErr&);
 
         // take in a function with the custom signature
-        CLogErr& operator<<(MyStreamManipulator manip)
+        inline CLogErr& operator<<(MyStreamManipulator manip)
         {
             // call the function, and return it's value
             return manip(*this);
@@ -50,7 +50,7 @@ class CLogErr
         // define the custom endl for this stream.
         // note how it matches the `MyStreamManipulator`
         // function signature
-        static CLogErr& endl(CLogErr& stream)
+        static inline CLogErr& endl(CLogErr& stream)
         {
             // print a new line
 
