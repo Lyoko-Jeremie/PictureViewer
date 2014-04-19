@@ -404,13 +404,13 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             break;
 
         case WM_MOUSEWHEEL :
-            // HIWORD(wParam) == WHEEL_DELTA的倍数 && 正为下
+            // HIWORD(wParam) == WHEEL_DELTA的倍数 && 正为上
 //            clogerr << "WM_MOUSEWHEEL " << static_cast<short>( HIWORD(wParam) ) << endl;
-            if ( HIWORD(wParam) < 0 )
+            if ( static_cast<short>( HIWORD(wParam) < 0 ) )
             {
                 PictrueLast();
             }
-            if ( HIWORD(wParam) > 0 )
+            if ( static_cast<short>( HIWORD(wParam) > 0 ) )
             {
                 PictrueNext();
             }

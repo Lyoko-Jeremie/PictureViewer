@@ -56,7 +56,7 @@ DirectXControl::DirectXControl( HWND hwnd, bool IsFullScreen ):
     lpddsback(nullptr),
     BaseX(0),
     BaseY(0),
-    PureColor(0)
+    PureColorD(0)
 {
     // 初始化结构体
     DDRAW_INIT_STRUCT(this->ddsd);
@@ -500,7 +500,7 @@ bool DirectXControl::PaintImage(
                 {
                     for ( unsigned int x = 0; UserWide > x; ++x)
                     {
-                        back_buffer[ x + y*lPitch32 ] = this->PureColor;
+                        back_buffer[ x + y*lPitch32 ] = this->PureColorD;
                     }
                 }
 
@@ -532,8 +532,30 @@ bool DirectXControl::PaintImage(
                                                                                                         pImage[ImageBit+2]
                                                                                                         );
                                 }
+//                                if ( 4 == Channels )
                                 if ( 4 == Channels && 0 != pImage[ImageBit] )
                                 {
+//                                    // 添加 Alpha 透明混合算法        暂时实现不了
+//                                    ARGB a(
+//                                            pImage[ImageBit],
+//                                            pImage[ImageBit+1] * pImage[ImageBit] ,
+//                                            pImage[ImageBit+2] * pImage[ImageBit] ,
+//                                            pImage[ImageBit+3] * pImage[ImageBit]
+//                                            );
+//                                    ARGB b( this->PureColorU );
+//                                    b.Red *= b.Alpha * ( 255 - a.Alpha ) ;
+//                                    b.Green *= b.Alpha * ( 255 - a.Alpha ) ;
+//                                    b.Blue *= b.Alpha * ( 255 - a.Alpha ) ;
+//                                    UCHAR alpha = a.Alpha + b.Alpha - (a.Alpha * b.Alpha) ;
+//                                    if ( alpha )
+//                                    {
+//                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
+//                                                                            255,
+//                                                                            (a.Red + b.Red) /alpha,
+//                                                                            (a.Green + b.Green) /alpha,
+//                                                                            (a.Blue + b.Blue) /alpha
+//                                                                            );
+//                                    }
                                     back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
                                                                                                         pImage[ImageBit],
                                                                                                         pImage[ImageBit+1],
@@ -712,7 +734,7 @@ bool DirectXControl::ClearScreen()
         clogerr << "Now Lock" << endl;
 
         // 随机色
-        this->PureColor = _RGB32BIT( rand()%255, rand()%255, rand()%255, rand()%255);
+        this->ChangeBackGroudColor();
 
 
         // 两个表面都要清空
@@ -753,7 +775,7 @@ bool DirectXControl::ClearScreen()
                     {
                         for ( unsigned int x = 0; xLimit != x; ++x)
                         {
-                            back_buffer[ x + y*lPitch32 ] = PureColor;
+                            back_buffer[ x + y*lPitch32 ] = PureColorD;
                         }
                     }
 
@@ -819,11 +841,35 @@ bool DirectXControl::ReBase()
 
 bool DirectXControl::ChangeBackGroudColor()
 {
-    this->PureColor = _RGB32BIT( rand()%255, rand()%255, rand()%255, rand()%255);
+    // 创建随机色
+    this->PureColorU.Alpha =  rand()%255;
+    this->PureColorU.Red =  rand()%255;
+    this->PureColorU.Green =  rand()%255;
+    this->PureColorU.Blue =  rand()%255;
+    // 同步到 PureColorD
+    this->PureColorD = _RGB32BIT(
+                                this->PureColorU.Alpha,
+                                this->PureColorU.Red,
+                                this->PureColorU.Green,
+                                this->PureColorU.Blue
+                                );
     return true;
 }
 
 
+DWORD DirectXControl::GetBackGroudColor()
+{
+    return this->PureColorD;
+}
+
+bool DirectXControl::SetBackGroudColor( UCHAR Red, UCHAR Green, UCHAR Blue, UCHAR Alpha /* = 0 */ )
+{
+    this->PureColorU.Alpha = Alpha;
+    this->PureColorU.Red = Red;
+    this->PureColorU.Green = Green;
+    this->PureColorU.Blue = Blue;
+    return true;
+}
 
 
 

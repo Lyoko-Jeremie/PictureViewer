@@ -46,6 +46,8 @@ class DirectXControl
         bool AddBaseY( int i);
         bool ReBase();
         bool ChangeBackGroudColor();
+        DWORD GetBackGroudColor();
+        bool SetBackGroudColor( UCHAR Red, UCHAR Green, UCHAR Blue, UCHAR Alpha = 0 );
 
 
     protected:
@@ -77,7 +79,27 @@ class DirectXControl
         int BaseX;
         int BaseY;
 
-        DWORD PureColor;
+        // 纯色 DWORD 版
+        DWORD PureColorD;
+        // 纯色 ARGB 版        Note:两个应该同步
+        struct ARGB{
+            UCHAR Alpha;
+            UCHAR Red;
+            UCHAR Green;
+            UCHAR Blue;
+            ARGB():Alpha(0),Red(0),Green(0),Blue(0) {}
+            ARGB( const UCHAR &alpha, const UCHAR &red, const UCHAR &green, const UCHAR &blue ):
+                        Alpha(alpha),Red(red),Green(green),Blue(blue) {}
+            ARGB( const DWORD &s ):Alpha(0),Red(0),Green(0),Blue(0)
+            {
+                this->Blue = static_cast<UCHAR>( s & 0xff );
+                this->Green = static_cast<UCHAR>( ( s >> 8 ) & 0xff );
+                this->Red = static_cast<UCHAR>( ( s >> 16 ) & 0xff );
+                this->Alpha = static_cast<UCHAR>( ( s >> 24 ) & 0xff );
+            }
+            ARGB( const ARGB &s ):
+                Alpha(s.Alpha),Red(s.Red),Green(s.Green),Blue(s.Blue){}
+        } PureColorU;
 
 //        // 设置宽高
 //        DWORD dwWidth;
