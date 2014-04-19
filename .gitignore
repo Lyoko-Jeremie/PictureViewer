@@ -215,3 +215,12 @@ pip-log.txt
 .mr.developer.cfg
 *.save
 CppCheckResults.xml
+
+#Lib
+lpng1610/
+zlib128/
+xz505/
+
+#Other
+png/
+
