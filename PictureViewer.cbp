@@ -46,7 +46,6 @@
 			<Add library="lpng1610\libpng.a" />
 			<Add library="zlib128\libz.a" />
 		</Linker>
-		<Unit filename="CLogErr.cpp" />
 		<Unit filename="CLogErr.h" />
 		<Unit filename="DirectXControl.cpp" />
 		<Unit filename="DirectXControl.h" />
