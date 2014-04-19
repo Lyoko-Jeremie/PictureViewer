@@ -683,6 +683,7 @@ bool DrawObject( int object, pIMAGE pImage /*= nullptr*/, int demo /*= 0*/)
     if ( 0 == object )
     {
 
+        // 对 Demo 绘图进行守护
         #ifdef NDEBUG
         static DWORD start_time;
         #endif // NDEBUG
