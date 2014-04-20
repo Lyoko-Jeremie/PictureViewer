@@ -496,6 +496,47 @@ bool DirectXControl::PaintImage(
 
                 // 清空表面
 
+                // 计算颜色     使用平均色填涂背景
+                if ( 3 == Channels )
+                {
+                    ARGB color;
+                    unsigned long Perimeter = (ImageHeight + ImageWide)*2;
+                    clogerr << "Perimeter:" << Perimeter <<endl;
+                    for ( unsigned int c = 0; c != 3; ++c)
+                    {
+                        unsigned long AverageColor = 0;
+                        for ( unsigned int i = 0; i != ImageWide; ++i)
+                        {
+                            AverageColor += ppImage[0][ i*3 + c ];
+                            AverageColor += ppImage[ImageHeight-1][ i*3 + c ];
+                        }
+                        clogerr << "ImageWide:AverageColor:" << AverageColor <<endl;
+                        for ( unsigned int i = 0; i != ImageHeight; ++i)
+                        {
+                            AverageColor += ppImage[i][c];
+                            AverageColor += ppImage[i][ ( ImageWide - 1 ) *3 + c ];
+                        }
+                        clogerr << "ImageHeight:AverageColor:" << AverageColor <<endl;
+                        if ( 0==c )
+                        {
+                            color.Red = AverageColor / Perimeter;
+                        }
+                        if ( 1==c )
+                        {
+                            color.Green = AverageColor / Perimeter;
+                        }
+                        if ( 2==c )
+                        {
+                            color.Blue = AverageColor / Perimeter;
+                        }
+                    }
+                    clogerr << "AverageColor: "
+                                << "\nRed: " << color.Red
+                                << "\tGreen: " << color.Green
+                                << "\tBlue: " << color.Blue << endl;
+                    this->PureColorD = color.to_ARGB32();
+                }
+
                 for ( unsigned int y = 0; UserHeight > y; ++y)
                 {
                     for ( unsigned int x = 0; UserWide > x; ++x)

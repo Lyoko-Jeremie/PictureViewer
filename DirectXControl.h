@@ -99,6 +99,10 @@ class DirectXControl
             }
             ARGB( const ARGB &s ):
                 Alpha(s.Alpha),Red(s.Red),Green(s.Green),Blue(s.Blue){}
+            DWORD to_ARGB32()
+            {
+                return ((Blue) + ((Green) << 8) + ((Red) << 16) + ((Alpha) << 24));
+            }
         } PureColorU;
 
 //        // ÉèÖÃ¿í¸ß

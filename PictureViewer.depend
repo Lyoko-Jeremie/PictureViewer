@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1397929801 source:h:\github\pictureviewer\main.cpp
+1397930420 source:h:\github\pictureviewer\main.cpp
 	<windows.h>
 	<windowsx.h>
 	<string>
@@ -23,7 +23,7 @@
 	<windowsx.h>
 	<ddraw.h>
 
-1397912848 h:\github\pictureviewer\directxcontrol.h
+1397972090 h:\github\pictureviewer\directxcontrol.h
 	<windows.h>
 	<ddraw.h>
 
