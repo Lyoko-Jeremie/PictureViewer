@@ -590,13 +590,13 @@ bool DirectXControl::PaintImage(
 //                                    b.Green *= b.Alpha * ( 255 - a.Alpha ) ;
 //                                    b.Blue *= b.Alpha * ( 255 - a.Alpha ) ;
 //                                    UCHAR alpha = a.Alpha + b.Alpha - (a.Alpha * b.Alpha) ;
-//                                    if ( alpha )
+////                                    if ( alpha )
 //                                    {
 //                                    back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
-//                                                                            255,
-//                                                                            (a.Red + b.Red) /alpha,
-//                                                                            (a.Green + b.Green) /alpha,
-//                                                                            (a.Blue + b.Blue) /alpha
+//                                                                            alpha,
+//                                                                            (a.Red + b.Red) ,
+//                                                                            (a.Green + b.Green) ,
+//                                                                            (a.Blue + b.Blue)
 //                                                                            );
 //                                    }
                                     back_buffer[ x + y*lPitch32 ] = _RGB32BIT(
