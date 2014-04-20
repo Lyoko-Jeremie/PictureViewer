@@ -77,7 +77,8 @@ size_t gsFileIndex = 0;
 int giShowType = 0;
 // Demo内容   初始值 1
 int giDemoType = 1;
-
+// 自动背景色
+bool gbAutoBackGroudColor = true;
 
 // 鼠标拖动用参数
 bool gbMouseLeftButtonDown = false;
@@ -394,11 +395,15 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
             break;
 
         case WM_RBUTTONDOWN:
-            gpDxc->ChangeBackGroudColor();
             if ( true == gbMouseLeftButtonDown )
             {
                 // 发退出指令
                 ExitAPPMessage();
+            }else{
+                // 关闭自动背景色
+                gbAutoBackGroudColor = false;
+                // 改变背景
+                gpDxc->ChangeBackGroudColor();
             }
             // 右键消息
             break;
@@ -487,14 +492,14 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
                     break;
 
                 case MENU_DEMO_ID_RAND_COLOER_RECT:
-                    gpDxc->ClearScreen();
+                    //gpDxc->ClearScreen();
                     ClosePngFile();
                     giShowType = 0;
                     giDemoType = 1;
                     break;
 
                 case MENU_DEMO_ID_RAND_COLOER_LINE:
-                    gpDxc->ClearScreen();
+                    //gpDxc->ClearScreen();
                     ClosePngFile();
                     giShowType = 0;
                     giDemoType = 2;
@@ -549,6 +554,9 @@ void PictrueLast()
         giShowType = 0;
     }
 
+    // 恢复自动背景色
+    gbAutoBackGroudColor = true;
+
     ReDrawing();
     return;
 }
@@ -576,6 +584,9 @@ void PictrueNext()
     {
         giShowType = 0;
     }
+
+    // 恢复自动背景色
+    gbAutoBackGroudColor = true;
 
     ReDrawing();
     return;
@@ -712,7 +723,8 @@ bool DrawObject( int object, pIMAGE pImage /*= nullptr*/, int demo /*= 0*/)
                           atImageDate.Height,
                           atImageDate.BitDepth,
                           atImageDate.ColorType,
-                          atImageDate.Channels
+                          atImageDate.Channels,
+                          gbAutoBackGroudColor
                           );
         return true;
     }

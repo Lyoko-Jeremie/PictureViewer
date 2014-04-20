@@ -33,7 +33,15 @@ class DirectXControl
         RECT GetMainWindowClientRect();
 
         bool TestPaint( int type, unsigned int runtimes = 3);
-        bool PaintImage( UCHAR **ppImage, unsigned int Wide, unsigned int Height, UCHAR BitDepth, UCHAR ColorType, UCHAR Channels );
+        bool PaintImage(
+                        UCHAR **ppImage,
+                        unsigned int Wide,
+                        unsigned int Height,
+                        UCHAR BitDepth,
+                        UCHAR ColorType,
+                        UCHAR Channels,
+                        bool AutoBackGroudColor
+                        );
         bool ClearScreen();
 
         bool PrimaryShow();

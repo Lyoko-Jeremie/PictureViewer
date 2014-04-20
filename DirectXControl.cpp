@@ -434,7 +434,8 @@ bool DirectXControl::PaintImage(
                                 unsigned int Height,
                                 UCHAR BitDepth,
                                 UCHAR ColorType,
-                                UCHAR Channels
+                                UCHAR Channels,
+                                bool AutoBackGroudColor
                                 )
 {
 
@@ -497,7 +498,7 @@ bool DirectXControl::PaintImage(
                 // 清空表面
 
                 // 计算颜色     使用平均色填涂背景
-                if ( 3 == Channels )
+                if ( 3 == Channels && AutoBackGroudColor )
                 {
                     ARGB color;
                     unsigned long Perimeter = (ImageHeight + ImageWide)*2;
@@ -531,10 +532,11 @@ bool DirectXControl::PaintImage(
                         }
                     }
                     clogerr << "AverageColor: "
-                                << "\nRed: " << color.Red
-                                << "\tGreen: " << color.Green
-                                << "\tBlue: " << color.Blue << endl;
+                                << "\nRed: " << static_cast<int>( color.Red )
+                                << "\tGreen: " << static_cast<int>( color.Green )
+                                << "\tBlue: " << static_cast<int>( color.Blue )  << endl;
                     this->PureColorD = color.to_ARGB32();
+                    this->PureColorU = color;
                 }
 
                 for ( unsigned int y = 0; UserHeight > y; ++y)
@@ -775,7 +777,7 @@ bool DirectXControl::ClearScreen()
         clogerr << "Now Lock" << endl;
 
         // 随机色
-        this->ChangeBackGroudColor();
+//        this->ChangeBackGroudColor();
 
 
         // 两个表面都要清空
